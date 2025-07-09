@@ -1,0 +1,13 @@
+{
+  "TenantId": "your-tenant-id",
+  "ClientId": "your-client-id",
+  "KeyVaultName": "your-keyvault-name",
+  "SecretName": "your-secret-name",
+  "WorkspaceId": "your-log-analytics-workspace-id",
+  "WorkspaceKey": "your-log-analytics-workspace-key",
+  "SharePointSites": [
+    "tenant.sharepoint.com/sites/site1",
+    "tenant.sharepoint.com/sites/site2"
+  ],
+  "LogName": "SharePointStorageStats"
+}

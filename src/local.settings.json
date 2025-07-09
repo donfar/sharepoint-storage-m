@@ -1,0 +1,14 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "powershell",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "TenantId": "",
+    "ClientId": "",
+    "KeyVaultName": "",
+    "SecretName": "",
+    "WorkspaceId": "",
+    "WorkspaceKey": "",
+    "SharePointSites": "tenant.sharepoint.com/sites/site1,tenant.sharepoint.com/sites/site2"
+  }
+}

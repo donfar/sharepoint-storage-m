@@ -1,0 +1,457 @@
+{
+  "properties": {
+    "lenses": {
+      "0": {
+        "order": 0,
+        "parts": {
+          "0": {
+            "position": {
+              "x": 0,
+              "y": 0,
+              "colSpan": 6,
+              "rowSpan": 4
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "resourceTypeMode",
+                  "isOptional": true,
+                  "value": "workspace"
+                },
+                {
+                  "name": "ComponentId",
+                  "isOptional": true,
+                  "value": {
+                    "SubscriptionId": "${subscriptionId}",
+                    "ResourceGroup": "${resourceGroup}",
+                    "Name": "${workspaceName}"
+                  }
+                },
+                {
+                  "name": "Scope",
+                  "isOptional": true,
+                  "value": {
+                    "resourceIds": [
+                      "/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/microsoft.operationalinsights/workspaces/${workspaceName}"
+                    ]
+                  }
+                },
+                {
+                  "name": "PartId",
+                  "isOptional": true,
+                  "value": "SharePoint Storage Usage Over Time"
+                },
+                {
+                  "name": "Version",
+                  "isOptional": true,
+                  "value": "2.0"
+                },
+                {
+                  "name": "TimeRange",
+                  "isOptional": true,
+                  "value": "P30D"
+                },
+                {
+                  "name": "DashboardId",
+                  "isOptional": true,
+                  "value": "${dashboardId}"
+                },
+                {
+                  "name": "Query",
+                  "isOptional": false,
+                  "value": "SharePointStorageStats_CL\n| project TimeGenerated, SiteUrl_s, StorageUsed_d\n| render timechart"
+                },
+                {
+                  "name": "ControlType",
+                  "isOptional": true,
+                  "value": "FrameControlChart"
+                },
+                {
+                  "name": "SpecificChart",
+                  "isOptional": true,
+                  "value": "Line"
+                },
+                {
+                  "name": "PartTitle",
+                  "isOptional": true,
+                  "value": "SharePoint Storage Usage Over Time"
+                },
+                {
+                  "name": "PartSubTitle",
+                  "isOptional": true,
+                  "value": "${workspaceName}"
+                }
+              ],
+              "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+            }
+          },
+          "1": {
+            "position": {
+              "x": 6,
+              "y": 0,
+              "colSpan": 6,
+              "rowSpan": 4
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "resourceTypeMode",
+                  "isOptional": true,
+                  "value": "workspace"
+                },
+                {
+                  "name": "ComponentId",
+                  "isOptional": true,
+                  "value": {
+                    "SubscriptionId": "${subscriptionId}",
+                    "ResourceGroup": "${resourceGroup}",
+                    "Name": "${workspaceName}"
+                  }
+                },
+                {
+                  "name": "Scope",
+                  "isOptional": true,
+                  "value": {
+                    "resourceIds": [
+                      "/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/microsoft.operationalinsights/workspaces/${workspaceName}"
+                    ]
+                  }
+                },
+                {
+                  "name": "PartId",
+                  "isOptional": true,
+                  "value": "SharePoint Storage Percentage Used"
+                },
+                {
+                  "name": "Version",
+                  "isOptional": true,
+                  "value": "2.0"
+                },
+                {
+                  "name": "TimeRange",
+                  "isOptional": true,
+                  "value": "P30D"
+                },
+                {
+                  "name": "DashboardId",
+                  "isOptional": true,
+                  "value": "${dashboardId}"
+                },
+                {
+                  "name": "Query",
+                  "isOptional": false,
+                  "value": "SharePointStorageStats_CL\n| project TimeGenerated, SiteUrl_s, PercentageUsed_d\n| render timechart"
+                },
+                {
+                  "name": "ControlType",
+                  "isOptional": true,
+                  "value": "FrameControlChart"
+                },
+                {
+                  "name": "SpecificChart",
+                  "isOptional": true,
+                  "value": "Line"
+                },
+                {
+                  "name": "PartTitle",
+                  "isOptional": true,
+                  "value": "SharePoint Storage Percentage Used"
+                },
+                {
+                  "name": "PartSubTitle",
+                  "isOptional": true,
+                  "value": "${workspaceName}"
+                }
+              ],
+              "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+            }
+          },
+          "2": {
+            "position": {
+              "x": 0,
+              "y": 4,
+              "colSpan": 12,
+              "rowSpan": 4
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "resourceTypeMode",
+                  "isOptional": true,
+                  "value": "workspace"
+                },
+                {
+                  "name": "ComponentId",
+                  "isOptional": true,
+                  "value": {
+                    "SubscriptionId": "${subscriptionId}",
+                    "ResourceGroup": "${resourceGroup}",
+                    "Name": "${workspaceName}"
+                  }
+                },
+                {
+                  "name": "Scope",
+                  "isOptional": true,
+                  "value": {
+                    "resourceIds": [
+                      "/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/microsoft.operationalinsights/workspaces/${workspaceName}"
+                    ]
+                  }
+                },
+                {
+                  "name": "PartId",
+                  "isOptional": true,
+                  "value": "Latest SharePoint Storage Data"
+                },
+                {
+                  "name": "Version",
+                  "isOptional": true,
+                  "value": "2.0"
+                },
+                {
+                  "name": "TimeRange",
+                  "isOptional": true,
+                  "value": "P1D"
+                },
+                {
+                  "name": "DashboardId",
+                  "isOptional": true,
+                  "value": "${dashboardId}"
+                },
+                {
+                  "name": "Query",
+                  "isOptional": false,
+                  "value": "SharePointStorageStats_CL\n| summarize arg_max(TimeGenerated, *) by SiteUrl_s\n| project SiteUrl_s, SiteTitle_s, StorageUsed_d, StorageQuota_d, PercentageUsed_d, TimeGenerated\n| order by PercentageUsed_d desc"
+                },
+                {
+                  "name": "ControlType",
+                  "isOptional": true,
+                  "value": "AnalyticsGrid"
+                },
+                {
+                  "name": "SpecificChart",
+                  "isOptional": true
+                },
+                {
+                  "name": "PartTitle",
+                  "isOptional": true,
+                  "value": "Latest SharePoint Storage Data"
+                },
+                {
+                  "name": "PartSubTitle",
+                  "isOptional": true,
+                  "value": "${workspaceName}"
+                }
+              ],
+              "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+            }
+          },
+          "3": {
+            "position": {
+              "x": 0,
+              "y": 8,
+              "colSpan": 6,
+              "rowSpan": 4
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "resourceTypeMode",
+                  "isOptional": true,
+                  "value": "workspace"
+                },
+                {
+                  "name": "ComponentId",
+                  "isOptional": true,
+                  "value": {
+                    "SubscriptionId": "${subscriptionId}",
+                    "ResourceGroup": "${resourceGroup}",
+                    "Name": "${workspaceName}"
+                  }
+                },
+                {
+                  "name": "Scope",
+                  "isOptional": true,
+                  "value": {
+                    "resourceIds": [
+                      "/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/microsoft.operationalinsights/workspaces/${workspaceName}"
+                    ]
+                  }
+                },
+                {
+                  "name": "PartId",
+                  "isOptional": true,
+                  "value": "Storage Usage by Site"
+                },
+                {
+                  "name": "Version",
+                  "isOptional": true,
+                  "value": "2.0"
+                },
+                {
+                  "name": "TimeRange",
+                  "isOptional": true,
+                  "value": "P1D"
+                },
+                {
+                  "name": "DashboardId",
+                  "isOptional": true,
+                  "value": "${dashboardId}"
+                },
+                {
+                  "name": "Query",
+                  "isOptional": false,
+                  "value": "SharePointStorageStats_CL\n| summarize arg_max(TimeGenerated, *) by SiteUrl_s\n| project SiteTitle_s, StorageUsed_d\n| sort by StorageUsed_d desc\n| render piechart"
+                },
+                {
+                  "name": "ControlType",
+                  "isOptional": true,
+                  "value": "FrameControlChart"
+                },
+                {
+                  "name": "SpecificChart",
+                  "isOptional": true,
+                  "value": "Pie"
+                },
+                {
+                  "name": "PartTitle",
+                  "isOptional": true,
+                  "value": "Storage Usage by Site"
+                },
+                {
+                  "name": "PartSubTitle",
+                  "isOptional": true,
+                  "value": "${workspaceName}"
+                }
+              ],
+              "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+            }
+          },
+          "4": {
+            "position": {
+              "x": 6,
+              "y": 8,
+              "colSpan": 6,
+              "rowSpan": 4
+            },
+            "metadata": {
+              "inputs": [
+                {
+                  "name": "resourceTypeMode",
+                  "isOptional": true,
+                  "value": "workspace"
+                },
+                {
+                  "name": "ComponentId",
+                  "isOptional": true,
+                  "value": {
+                    "SubscriptionId": "${subscriptionId}",
+                    "ResourceGroup": "${resourceGroup}",
+                    "Name": "${workspaceName}"
+                  }
+                },
+                {
+                  "name": "Scope",
+                  "isOptional": true,
+                  "value": {
+                    "resourceIds": [
+                      "/subscriptions/${subscriptionId}/resourcegroups/${resourceGroup}/providers/microsoft.operationalinsights/workspaces/${workspaceName}"
+                    ]
+                  }
+                },
+                {
+                  "name": "PartId",
+                  "isOptional": true,
+                  "value": "Storage Growth Rate"
+                },
+                {
+                  "name": "Version",
+                  "isOptional": true,
+                  "value": "2.0"
+                },
+                {
+                  "name": "TimeRange",
+                  "isOptional": true,
+                  "value": "P30D"
+                },
+                {
+                  "name": "DashboardId",
+                  "isOptional": true,
+                  "value": "${dashboardId}"
+                },
+                {
+                  "name": "Query",
+                  "isOptional": false,
+                  "value": "let startDate = ago(30d);\nlet endDate = now();\nSharePointStorageStats_CL\n| where TimeGenerated >= startDate and TimeGenerated <= endDate\n| summarize StartStorageUsed = min(StorageUsed_d), EndStorageUsed = max(StorageUsed_d) by SiteUrl_s\n| extend GrowthMB = EndStorageUsed - StartStorageUsed\n| extend GrowthPercent = iff(StartStorageUsed > 0, (GrowthMB / StartStorageUsed) * 100, 0)\n| project SiteUrl_s, StartStorageUsed, EndStorageUsed, GrowthMB, GrowthPercent\n| order by GrowthMB desc"
+                },
+                {
+                  "name": "ControlType",
+                  "isOptional": true,
+                  "value": "AnalyticsGrid"
+                },
+                {
+                  "name": "SpecificChart",
+                  "isOptional": true
+                },
+                {
+                  "name": "PartTitle",
+                  "isOptional": true,
+                  "value": "30-Day Storage Growth Rate"
+                },
+                {
+                  "name": "PartSubTitle",
+                  "isOptional": true,
+                  "value": "${workspaceName}"
+                }
+              ],
+              "type": "Extension/Microsoft_OperationsManagementSuite_Workspace/PartType/LogsDashboardPart"
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "model": {
+        "timeRange": {
+          "value": {
+            "relative": {
+              "duration": 24,
+              "timeUnit": 1
+            }
+          },
+          "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+        },
+        "filterLocale": {
+          "value": "en-us"
+        },
+        "filters": {
+          "value": {
+            "MsPortalFx_TimeRange": {
+              "model": {
+                "format": "utc",
+                "granularity": "auto",
+                "relative": "24h"
+              },
+              "displayCache": {
+                "name": "UTC Time",
+                "value": "Past 24 hours"
+              },
+              "filteredPartIds": [
+                "StartboardPart-LogsDashboardPart-0",
+                "StartboardPart-LogsDashboardPart-1",
+                "StartboardPart-LogsDashboardPart-2"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "name": "SharePoint Storage Monitor Dashboard",
+  "type": "Microsoft.Portal/dashboards",
+  "location": "INSERT LOCATION",
+  "tags": {
+    "hidden-title": "SharePoint Storage Monitor Dashboard"
+  },
+  "apiVersion": "2015-08-01-preview"
+}
