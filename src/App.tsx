@@ -956,7 +956,7 @@ stages:
                       Configure service connections in your Azure DevOps project:
                     </p>
                     <ol className="list-decimal pl-6 space-y-2">
-                      <li>Go to Project Settings > Service Connections</li>
+                      <li>Go to Project Settings {`>`} Service Connections</li>
                       <li>Create an Azure Resource Manager connection</li>
                       <li>Name it <code>serviceconnection-dev</code></li>
                       <li>Create additional connections for other environments (<code>serviceconnection-test</code>, <code>serviceconnection-prod</code>)</li>
