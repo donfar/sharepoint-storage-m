@@ -1,0 +1,28 @@
+{
+  "WorkspaceId": "your-log-analytics-workspace-id",
+  "WorkspaceKey": "your-log-analytics-workspace-key",
+  "LogName": "SharePointStorageStats",
+  "KeyVaultName": "your-keyvault-name",
+  "Tenants": [
+    {
+      "TenantId": "tenant1-id",
+      "TenantName": "Contoso",
+      "ClientId": "app-registration-client-id-for-tenant1",
+      "SecretName": "contoso-sharepoint-app-secret",
+      "SharePointSites": [
+        "contoso.sharepoint.com/sites/site1",
+        "contoso.sharepoint.com/sites/site2"
+      ]
+    },
+    {
+      "TenantId": "tenant2-id",
+      "TenantName": "Fabrikam",
+      "ClientId": "app-registration-client-id-for-tenant2",
+      "SecretName": "fabrikam-sharepoint-app-secret",
+      "SharePointSites": [
+        "fabrikam.sharepoint.com/sites/marketing",
+        "fabrikam.sharepoint.com/sites/sales"
+      ]
+    }
+  ]
+}

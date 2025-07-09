@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CodeBlock } from "./components/code-block";
-import { FileIcon, Database, LineChart, Terminal, Code, FileCode, Copy, Info } from "@phosphor-icons/react";
+import { FileIcon, Database, LineChart, Terminal, Code, FileCode, Copy, Info, Buildings } from "@phosphor-icons/react";
 
 function App() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -24,14 +24,17 @@ function App() {
       <header className="mb-8 space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">SharePoint Storage Monitor</h1>
         <p className="text-muted-foreground text-lg">
-          PowerShell application that runs as an Azure Function to track and visualize SharePoint storage utilization
+          Multi-tenant PowerShell application that runs as an Azure Function to track and visualize SharePoint storage utilization across environments
         </p>
       </header>
 
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Info weight="duotone" /> Overview
+          </TabsTrigger>
+          <TabsTrigger value="multi-tenant" className="flex items-center gap-2">
+            <Buildings weight="duotone" /> Multi-tenant
           </TabsTrigger>
           <TabsTrigger value="code" className="flex items-center gap-2">
             <FileCode weight="duotone" /> Code
@@ -54,6 +57,16 @@ function App() {
                 <CardTitle>Features</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
+                    <Buildings size={20} weight="duotone" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Multi-tenant Support</h3>
+                    <p className="text-muted-foreground">Monitor multiple SharePoint environments in a single solution</p>
+                  </div>
+                </div>
+                
                 <div className="flex items-start gap-3">
                   <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
                     <Terminal size={20} weight="duotone" />
@@ -79,8 +92,8 @@ function App() {
                     <LineChart size={20} weight="duotone" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-lg">Visualization</h3>
-                    <p className="text-muted-foreground">Data visualization through Azure Monitor dashboards</p>
+                    <h3 className="font-medium text-lg">Cross-tenant Visualization</h3>
+                    <p className="text-muted-foreground">Unified dashboards across all monitored environments</p>
                   </div>
                 </div>
                 
@@ -104,31 +117,41 @@ function App() {
               <CardContent className="space-y-4">
                 <div className="bg-muted p-4 rounded-lg">
                   <div className="flex flex-col gap-2 text-center">
-                    <div className="border border-border bg-card rounded-md p-2">
-                      PowerShell Script
-                      <div className="text-xs text-muted-foreground">SharePoint data collection</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="border border-border bg-card rounded-md p-2">
+                        Tenant 1
+                        <div className="text-xs text-muted-foreground">SharePoint Online</div>
+                      </div>
+                      <div className="border border-border bg-card rounded-md p-2">
+                        Tenant 2
+                        <div className="text-xs text-muted-foreground">SharePoint Online</div>
+                      </div>
+                      <div className="border border-border bg-card rounded-md p-2">
+                        Tenant 3
+                        <div className="text-xs text-muted-foreground">SharePoint Online</div>
+                      </div>
                     </div>
                     <div className="text-muted-foreground text-2xl">↓</div>
                     <div className="border border-border bg-primary text-primary-foreground rounded-md p-2">
                       Azure Function
-                      <div className="text-xs opacity-90">Daily scheduled execution</div>
+                      <div className="text-xs opacity-90">Multi-tenant PowerShell script</div>
                     </div>
                     <div className="text-muted-foreground text-2xl">↓</div>
                     <div className="border border-border bg-card rounded-md p-2">
                       Log Analytics
-                      <div className="text-xs text-muted-foreground">Data storage</div>
+                      <div className="text-xs text-muted-foreground">Unified data storage</div>
                     </div>
                     <div className="text-muted-foreground text-2xl">↓</div>
                     <div className="border border-border bg-accent text-accent-foreground rounded-md p-2">
                       Azure Monitor
-                      <div className="text-xs opacity-90">Data visualization</div>
+                      <div className="text-xs opacity-90">Cross-tenant visualization</div>
                     </div>
                   </div>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="secondary" className="w-full" onClick={() => setActiveTab("deployment")}>
-                  Deployment Guide
+                <Button variant="secondary" className="w-full" onClick={() => setActiveTab("multi-tenant")}>
+                  Multi-tenant Features
                 </Button>
               </CardFooter>
             </Card>
@@ -143,10 +166,189 @@ function App() {
               <CardContent>
                 <ul className="list-disc pl-6 space-y-2">
                   <li>Azure subscription</li>
-                  <li>SharePoint Online tenant with appropriate permissions</li>
-                  <li>SharePoint App Registration with Sites.Read.All permissions</li>
+                  <li>Multiple SharePoint Online tenants with appropriate permissions</li>
+                  <li>SharePoint App Registration in each tenant with Sites.Read.All permissions</li>
                   <li>PowerShell 7.2 or higher (for local testing)</li>
+                  <li>Azure Key Vault for secure credential storage</li>
+                  <li>Azure Log Analytics workspace for centralized monitoring</li>
                 </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="multi-tenant">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Multi-tenant Capabilities</CardTitle>
+                <CardDescription>Monitor multiple SharePoint environments from a single solution</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p>
+                  The SharePoint Storage Monitor now supports collecting and analyzing storage data across multiple SharePoint tenants 
+                  in a single unified solution. This enables organizations to:
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mt-4">
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-lg flex items-center gap-2">
+                      <div className="bg-primary/10 text-primary rounded-md p-1.5">
+                        <Buildings size={18} weight="duotone" />
+                      </div>
+                      Centralized Management
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Monitor all SharePoint environments through a single pane of glass, eliminating the need for separate monitoring solutions.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-lg flex items-center gap-2">
+                      <div className="bg-primary/10 text-primary rounded-md p-1.5">
+                        <Database size={18} weight="duotone" />
+                      </div>
+                      Tenant Isolation
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Maintain security boundaries between tenants while still enabling unified reporting and analysis.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-lg flex items-center gap-2">
+                      <div className="bg-primary/10 text-primary rounded-md p-1.5">
+                        <LineChart size={18} weight="duotone" />
+                      </div>
+                      Comparative Analytics
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Compare storage utilization across tenants to identify trends and optimize resource allocation.
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="font-medium text-lg flex items-center gap-2">
+                      <div className="bg-primary/10 text-primary rounded-md p-1.5">
+                        <Code size={18} weight="duotone" />
+                      </div>
+                      Resilient Operation
+                    </h3>
+                    <p className="text-muted-foreground">
+                      Gracefully handle failures in one tenant without affecting data collection from others.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuration</CardTitle>
+                <CardDescription>How to set up multiple tenants in your config file</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p>
+                    Configure multiple tenants using the JSON configuration format below:
+                  </p>
+                  <CodeBlock 
+                    code={`{
+  "WorkspaceId": "your-log-analytics-workspace-id",
+  "WorkspaceKey": "your-log-analytics-workspace-key",
+  "LogName": "SharePointStorageStats",
+  "KeyVaultName": "your-keyvault-name",
+  "Tenants": [
+    {
+      "TenantId": "tenant1-id",
+      "TenantName": "Contoso",
+      "ClientId": "app-registration-client-id-for-tenant1",
+      "SecretName": "contoso-sharepoint-app-secret",
+      "SharePointSites": [
+        "contoso.sharepoint.com/sites/site1",
+        "contoso.sharepoint.com/sites/site2"
+      ]
+    },
+    {
+      "TenantId": "tenant2-id",
+      "TenantName": "Fabrikam",
+      "ClientId": "app-registration-client-id-for-tenant2",
+      "SecretName": "fabrikam-sharepoint-app-secret",
+      "SharePointSites": [
+        "fabrikam.sharepoint.com/sites/marketing",
+        "fabrikam.sharepoint.com/sites/sales"
+      ]
+    }
+  ]
+}`}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <p className="text-sm text-muted-foreground">
+                  Each tenant requires its own app registration in the respective Azure AD tenant with Sites.Read.All permissions.
+                </p>
+              </CardFooter>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Cross-Tenant Analytics</CardTitle>
+                <CardDescription>Example queries for multi-tenant reporting</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="font-medium">Storage By Tenant</h3>
+                  <CodeBlock
+                    code={`SharePointStorageStats_CL
+| summarize TotalStorageGB = sum(StorageUsed_d) / 1024 by TenantName_s
+| sort by TotalStorageGB desc
+| render piechart`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Growth Rate By Tenant</h3>
+                  <CodeBlock
+                    code={`let startDate = ago(30d);
+let endDate = now();
+SharePointStorageStats_CL
+| where TimeGenerated >= startDate and TimeGenerated <= endDate
+| summarize 
+    StartStorage = min(StorageUsed_d),
+    EndStorage = max(StorageUsed_d)
+    by TenantName_s
+| extend GrowthMB = EndStorage - StartStorage
+| extend GrowthPercent = iff(StartStorage > 0, (GrowthMB / StartStorage) * 100, 0)
+| project 
+    TenantName = TenantName_s,
+    StartStorageGB = StartStorage / 1024,
+    EndStorageGB = EndStorage / 1024,
+    GrowthGB = GrowthMB / 1024,
+    GrowthPercent
+| sort by GrowthPercent desc`}
+                  />
+                </div>
+                
+                <div className="grid md:grid-cols-2 gap-4 mt-4">
+                  <div className="border rounded-md p-4">
+                    <h4 className="font-medium mb-2">Site Count by Tenant</h4>
+                    <div className="bg-card rounded-md p-3 h-32 flex flex-col">
+                      <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
+                        [Chart visualization]
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="border rounded-md p-4">
+                    <h4 className="font-medium mb-2">Storage Usage Over Time</h4>
+                    <div className="bg-card rounded-md p-3 h-32 flex flex-col">
+                      <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
+                        [Chart visualization]
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -161,12 +363,12 @@ function App() {
                     <CardTitle className="flex items-center gap-2">
                       <FileIcon weight="duotone" className="text-primary" /> sharepoint-storage-monitor.ps1
                     </CardTitle>
-                    <CardDescription>Main PowerShell script for SharePoint data collection</CardDescription>
+                    <CardDescription>Multi-tenant PowerShell script for SharePoint data collection</CardDescription>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => handleCopyFile(`# View the complete code in the src/sharepoint-storage-monitor.ps1 file`)}
+                    onClick={() => handleCopyFile(`# View the complete code in the src/sharepoint-storage-monitor/sharepoint-storage-monitor.ps1 file`)}
                   >
                     <Copy className="mr-2 h-4 w-4" /> Copy
                   </Button>
@@ -174,8 +376,8 @@ function App() {
               </CardHeader>
               <CardContent>
                 <CodeBlock 
-                  code={`# SharePoint Storage Monitor
-# This script collects SharePoint storage utilization and sends data to Azure Log Analytics
+                  code={`# SharePoint Storage Monitor - Multi-tenant Edition
+# This script collects SharePoint storage utilization from multiple tenants and sends data to Azure Log Analytics
 
 # Get the current script path
 $scriptPath = $PSScriptRoot
@@ -185,46 +387,61 @@ $configPath = Join-Path -Path $scriptPath -ChildPath "config.json"
 if (Test-Path $configPath) {
     $config = Get-Content -Path $configPath -Raw | ConvertFrom-Json
 } else {
-    # Default configuration
+    # Default configuration (environment variables are used as fallback)
     $config = @{
-        TenantId = $env:TenantId
-        ClientId = $env:ClientId
+        WorkspaceId = $env:WorkspaceId
+        WorkspaceKey = $env:WorkspaceKey
+        LogName = $env:LogName ?? "SharePointStorageStats"
         KeyVaultName = $env:KeyVaultName
-        SecretName = $env:SecretName
-        # Additional configuration...
+        Tenants = @()
     }
-}
 
-# Function to check and install modules
-function Ensure-Module {
-    param (
-        [string]$ModuleName,
-        [string]$MinimumVersion = ""
-    )
-    
-    # Function implementation...
+    # If tenants are provided via environment variable
+    if ($env:TenantsList) {
+        try {
+            $config.Tenants = $env:TenantsList | ConvertFrom-Json
+        } catch {
+            Write-Error "Failed to parse TenantsList environment variable: $_"
+        }
+    }
 }
 
 # Main execution
 try {
-    # Get credentials from Key Vault
-    $credential = Get-SecureCredentials -TenantId $config.TenantId -ClientId $config.ClientId -KeyVaultName $config.KeyVaultName -SecretName $config.SecretName
+    Write-Output "Starting SharePoint Storage Monitor for multiple tenants"
+    $totalResults = @()
     
-    # Get SharePoint storage statistics
-    $storageData = Get-SharePointStorageStats -TenantId $config.TenantId -Credential $credential -SiteUrls $config.SharePointSites
-    
-    # Send data to Log Analytics
-    if ($storageData.Count -gt 0) {
-        Send-LogAnalyticsData -WorkspaceId $config.WorkspaceId -WorkspaceKey $config.WorkspaceKey -LogName $config.LogName -Data $storageData
+    # Process each tenant
+    foreach ($tenant in $config.Tenants) {
+        try {
+            Write-Output "Processing tenant: $($tenant.TenantName)"
+            
+            # Get credentials from Key Vault
+            $credential = Get-SecureCredentials -TenantId $tenant.TenantId -ClientId $tenant.ClientId -KeyVaultName $config.KeyVaultName -SecretName $tenant.SecretName
+            
+            # Get SharePoint storage statistics
+            $storageData = Get-SharePointStorageStats -TenantId $tenant.TenantId -TenantName $tenant.TenantName -Credential $credential -SiteUrls $tenant.SharePointSites
+            
+            if ($storageData.Count -gt 0) {
+                $totalResults += $storageData
+                Write-Output "Collected data from $($storageData.Count) sites in tenant $($tenant.TenantName)"
+            }
+        }
+        catch {
+            Write-Error "Error processing tenant $($tenant.TenantName): $_"
+            # Continue with next tenant
+        }
     }
-}
-catch {
-    Write-Error "Error in main execution: $_"
-    throw
+    
+    # Send all data to Log Analytics
+    if ($totalResults.Count -gt 0) {
+        Send-LogAnalyticsData -WorkspaceId $config.WorkspaceId -WorkspaceKey $config.WorkspaceKey -LogName $config.LogName -Data $totalResults
+        Write-Output "Successfully sent $($totalResults.Count) total records to Log Analytics"
+    }
 }`}
                 />
                 <div className="mt-4 text-sm text-muted-foreground">
-                  This is an abbreviated version. The complete script includes comprehensive error handling, secure credential management, and detailed SharePoint data collection.
+                  This is an abbreviated version. The complete script includes comprehensive error handling, secure credential management, and detailed SharePoint data collection across multiple tenants.
                 </div>
               </CardContent>
               <CardFooter>
@@ -235,6 +452,47 @@ catch {
             </Card>
             
             <div className="grid gap-6 md:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileIcon weight="duotone" className="text-primary" /> config-sample.json
+                  </CardTitle>
+                  <CardDescription>Multi-tenant configuration file</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CodeBlock 
+                    code={`{
+  "WorkspaceId": "your-log-analytics-workspace-id",
+  "WorkspaceKey": "your-log-analytics-workspace-key",
+  "LogName": "SharePointStorageStats",
+  "KeyVaultName": "your-keyvault-name",
+  "Tenants": [
+    {
+      "TenantId": "tenant1-id",
+      "TenantName": "Contoso",
+      "ClientId": "app-registration-client-id-for-tenant1",
+      "SecretName": "contoso-sharepoint-app-secret",
+      "SharePointSites": [
+        "contoso.sharepoint.com/sites/site1",
+        "contoso.sharepoint.com/sites/site2"
+      ]
+    },
+    {
+      "TenantId": "tenant2-id",
+      "TenantName": "Fabrikam",
+      "ClientId": "app-registration-client-id-for-tenant2",
+      "SecretName": "fabrikam-sharepoint-app-secret",
+      "SharePointSites": [
+        "fabrikam.sharepoint.com/sites/marketing",
+        "fabrikam.sharepoint.com/sites/sales"
+      ]
+    }
+  ]
+}`}
+                  />
+                </CardContent>
+              </Card>
+              
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -253,33 +511,8 @@ catch {
       "schedule": "0 0 0 * * *"
     }
   ],
-  "disabled": false
-}`}
-                  />
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileIcon weight="duotone" className="text-primary" /> config-sample.json
-                  </CardTitle>
-                  <CardDescription>Sample configuration file</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <CodeBlock 
-                    code={`{
-  "TenantId": "your-tenant-id",
-  "ClientId": "your-client-id",
-  "KeyVaultName": "your-keyvault-name",
-  "SecretName": "your-secret-name",
-  "WorkspaceId": "your-log-analytics-workspace-id",
-  "WorkspaceKey": "your-log-analytics-workspace-key",
-  "SharePointSites": [
-    "tenant.sharepoint.com/sites/site1",
-    "tenant.sharepoint.com/sites/site2"
-  ],
-  "LogName": "SharePointStorageStats"
+  "disabled": false,
+  "scriptFile": "sharepoint-storage-monitor.ps1"
 }`}
                   />
                 </CardContent>
@@ -292,22 +525,23 @@ catch {
           <div className="grid gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Deployment Steps</CardTitle>
+                <CardTitle>Multi-tenant Deployment Steps</CardTitle>
                 <CardDescription>Follow these steps to deploy the solution</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 inline-flex items-center justify-center text-sm">1</span> 
-                    Register an Azure AD Application
+                    Register App in Each Azure AD Tenant
                   </h3>
                   <div className="ml-8 space-y-2">
-                    <p>Create an app registration in Azure Active Directory:</p>
+                    <p>Create an app registration in each Azure Active Directory tenant:</p>
                     <ul className="list-disc pl-6 space-y-1">
                       <li>Go to Azure Active Directory > App registrations</li>
-                      <li>Create a new registration</li>
+                      <li>Create a new registration in each tenant</li>
                       <li>Grant API permissions: SharePoint > Sites.Read.All</li>
-                      <li>Create a client secret and save the value</li>
+                      <li>Create a client secret for each app registration and save the values</li>
+                      <li>Note the client IDs and tenant IDs for the configuration file</li>
                     </ul>
                   </div>
                 </div>
@@ -317,20 +551,39 @@ catch {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 inline-flex items-center justify-center text-sm">2</span> 
-                    Deploy Azure Resources
+                    Prepare Multi-tenant Configuration
                   </h3>
                   <div className="ml-8 space-y-2">
-                    <p>Run the deployment script with your parameters:</p>
+                    <p>Create a config.json file with tenant details:</p>
                     <CodeBlock 
-                      code={`./deploy.ps1 \\
-  -ResourceGroupName "SharePointMonitor-RG" \\
-  -Location "eastus" \\
-  -FunctionAppName "sharepoint-storage-monitor" \\
-  -KeyVaultName "sp-monitor-kv" \\
-  -SharePointClientSecret "your-client-secret" \\
-  -TenantId "your-tenant-id" \\
-  -ClientId "your-app-registration-client-id" \\
-  -SharePointSites "tenant.sharepoint.com/sites/site1,tenant.sharepoint.com/sites/site2"`}
+                      code={`{
+  "WorkspaceId": "your-log-analytics-workspace-id",
+  "WorkspaceKey": "your-log-analytics-workspace-key",
+  "LogName": "SharePointStorageStats",
+  "KeyVaultName": "your-keyvault-name",
+  "Tenants": [
+    {
+      "TenantId": "tenant1-id",
+      "TenantName": "Contoso",
+      "ClientId": "app-registration-client-id-for-tenant1",
+      "SecretName": "contoso-sharepoint-app-secret",
+      "SharePointSites": [
+        "contoso.sharepoint.com/sites/site1",
+        "contoso.sharepoint.com/sites/site2"
+      ]
+    },
+    {
+      "TenantId": "tenant2-id",
+      "TenantName": "Fabrikam",
+      "ClientId": "app-registration-client-id-for-tenant2",
+      "SecretName": "fabrikam-sharepoint-app-secret",
+      "SharePointSites": [
+        "fabrikam.sharepoint.com/sites/marketing",
+        "fabrikam.sharepoint.com/sites/sales"
+      ]
+    }
+  ]
+}`}
                     />
                   </div>
                 </div>
@@ -340,18 +593,61 @@ catch {
                 <div className="space-y-2">
                   <h3 className="font-semibold text-lg flex items-center gap-2">
                     <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 inline-flex items-center justify-center text-sm">3</span> 
+                    Deploy Azure Resources
+                  </h3>
+                  <div className="ml-8 space-y-2">
+                    <p>Run the enhanced deployment script with your parameters:</p>
+                    <CodeBlock 
+                      code={`./deploy.ps1 \
+  -ResourceGroupName "SharePointMonitor-RG" \
+  -Location "eastus" \
+  -FunctionAppName "sharepoint-storage-monitor" \
+  -KeyVaultName "sp-monitor-kv" \
+  -WorkspaceId "your-log-analytics-workspace-id" \
+  -WorkspaceKey "your-log-analytics-workspace-key" \
+  -TenantsJsonPath "./config.json"`}
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 inline-flex items-center justify-center text-sm">4</span> 
                     Deploy the Function App Code
                   </h3>
                   <div className="ml-8 space-y-2">
                     <p>Package and deploy the code to Azure:</p>
                     <CodeBlock 
                       code={`# Compress the files
-Compress-Archive -Path *.ps1,*.json -DestinationPath function.zip
+Compress-Archive -Path ./sharepoint-storage-monitor/* -DestinationPath function.zip
 
 # Deploy to Azure Function App
-Publish-AzWebapp -ResourceGroupName "SharePointMonitor-RG" \\
-  -Name "sharepoint-storage-monitor" \\
+Publish-AzWebapp -ResourceGroupName "SharePointMonitor-RG" \
+  -Name "sharepoint-storage-monitor" \
   -ArchivePath function.zip`}
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 inline-flex items-center justify-center text-sm">5</span> 
+                    Verify Multi-tenant Operation
+                  </h3>
+                  <div className="ml-8 space-y-2">
+                    <p>Check the function logs to verify successful data collection from all tenants:</p>
+                    <CodeBlock 
+                      code={`# Sample log output
+Starting SharePoint Storage Monitor for multiple tenants
+Processing tenant: Contoso
+Collected data from 2 sites in tenant Contoso
+Processing tenant: Fabrikam
+Collected data from 2 sites in tenant Fabrikam
+Successfully sent 4 total records to Log Analytics`}
                     />
                   </div>
                 </div>
@@ -361,16 +657,28 @@ Publish-AzWebapp -ResourceGroupName "SharePointMonitor-RG" \\
             <Card>
               <CardHeader>
                 <CardTitle>Local Testing</CardTitle>
-                <CardDescription>Test the function locally before deployment</CardDescription>
+                <CardDescription>Test the multi-tenant function locally before deployment</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p>To test locally before deployment:</p>
+                  <p>To test the multi-tenant functionality locally:</p>
                   <ol className="list-decimal pl-6 space-y-2">
                     <li>Install Azure Functions Core Tools</li>
-                    <li>Update <code>local.settings.json</code> with your values</li>
-                    <li>Run the function locally:</li>
+                    <li>Update <code>local.settings.json</code> with your multi-tenant configuration:</li>
                   </ol>
+                  <CodeBlock code={`{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "powershell",
+    "WorkspaceId": "your-workspace-id",
+    "WorkspaceKey": "your-workspace-key",
+    "LogName": "SharePointStorageStats",
+    "KeyVaultName": "your-keyvault-name",
+    "TenantsList": "[{\"TenantId\":\"tenant1-id\",\"TenantName\":\"Contoso\",\"ClientId\":\"client-id-1\",\"SecretName\":\"secret-name-1\",\"SharePointSites\":[\"contoso.sharepoint.com/sites/site1\"]},{\"TenantId\":\"tenant2-id\",\"TenantName\":\"Fabrikam\",\"ClientId\":\"client-id-2\",\"SecretName\":\"secret-name-2\",\"SharePointSites\":[\"fabrikam.sharepoint.com/sites/marketing\"]}]"
+  }
+}`} />
+                  <p>Run the function locally with the Azure Functions Core Tools:</p>
                   <CodeBlock code={`func start`} />
                 </div>
               </CardContent>
@@ -382,50 +690,50 @@ Publish-AzWebapp -ResourceGroupName "SharePointMonitor-RG" \\
           <div className="grid gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Azure Monitor Dashboard</CardTitle>
-                <CardDescription>Visualize SharePoint storage data</CardDescription>
+                <CardTitle>Multi-tenant Azure Monitor Dashboard</CardTitle>
+                <CardDescription>Visualize SharePoint storage data across all tenants</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <p>
-                  Once data is collected, you can create a custom dashboard in Azure Monitor to visualize storage utilization trends.
+                  After collecting data from multiple tenants, you can create a unified dashboard in Azure Monitor to visualize storage trends across your entire SharePoint estate.
                 </p>
                 
                 <div className="rounded-lg border overflow-hidden">
                   <div className="bg-muted px-4 py-3 border-b">
-                    <h3 className="font-semibold">Sample Dashboard Layout</h3>
+                    <h3 className="font-semibold">Multi-tenant Dashboard Layout</h3>
                   </div>
                   <div className="p-4 grid gap-3">
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
-                        <div className="text-sm font-medium mb-1">Storage Usage Over Time</div>
+                        <div className="text-sm font-medium mb-1">Storage by Tenant</div>
                         <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
-                          [Line chart visualization]
+                          [Pie chart visualization]
                         </div>
                       </div>
                       <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
-                        <div className="text-sm font-medium mb-1">Storage Percentage Used</div>
+                        <div className="text-sm font-medium mb-1">Total Storage Usage Over Time</div>
                         <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
-                          [Line chart visualization]
+                          [Line chart visualization with tenant breakdown]
                         </div>
                       </div>
                     </div>
                     <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
-                      <div className="text-sm font-medium mb-1">Latest Storage Data</div>
+                      <div className="text-sm font-medium mb-1">Top Sites Across All Tenants</div>
                       <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
                         [Table visualization]
                       </div>
                     </div>
                     <div className="grid md:grid-cols-2 gap-3">
                       <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
-                        <div className="text-sm font-medium mb-1">Storage by Site</div>
+                        <div className="text-sm font-medium mb-1">Growth Rate by Tenant (30 Days)</div>
                         <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
-                          [Pie chart visualization]
+                          [Bar chart visualization]
                         </div>
                       </div>
                       <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
-                        <div className="text-sm font-medium mb-1">30-Day Growth Rate</div>
+                        <div className="text-sm font-medium mb-1">Site Count by Tenant</div>
                         <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
-                          [Table visualization]
+                          [Bar chart visualization]
                         </div>
                       </div>
                     </div>
@@ -437,49 +745,67 @@ Publish-AzWebapp -ResourceGroupName "SharePointMonitor-RG" \\
                   A full dashboard template JSON file is included in the project files for easy import.
                 </p>
                 <Button variant="outline" className="w-full">
-                  Download Dashboard Template
+                  Download Multi-tenant Dashboard Template
                 </Button>
               </CardFooter>
             </Card>
             
             <Card>
               <CardHeader>
-                <CardTitle>Sample Queries</CardTitle>
-                <CardDescription>Log Analytics queries to visualize your data</CardDescription>
+                <CardTitle>Multi-tenant Sample Queries</CardTitle>
+                <CardDescription>Log Analytics queries to visualize data across all tenants</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="font-medium">Storage Usage Over Time</h3>
+                  <h3 className="font-medium">Storage by Tenant</h3>
                   <CodeBlock
                     code={`SharePointStorageStats_CL
-| project TimeGenerated, SiteUrl_s, StorageUsed_d
-| render timechart`}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="font-medium">Storage Usage by Site</h3>
-                  <CodeBlock
-                    code={`SharePointStorageStats_CL
-| summarize arg_max(TimeGenerated, *) by SiteUrl_s
-| project SiteTitle_s, StorageUsed_d
-| sort by StorageUsed_d desc
+| summarize TotalStorageGB = sum(StorageUsed_d) / 1024 by TenantName_s
+| sort by TotalStorageGB desc
 | render piechart`}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="font-medium">Growth Rate Analysis</h3>
+                  <h3 className="font-medium">Storage Usage Over Time by Tenant</h3>
+                  <CodeBlock
+                    code={`SharePointStorageStats_CL
+| summarize AvgStorageUsedGB = sum(StorageUsed_d) / 1024 by TenantName_s, bin(TimeGenerated, 1d)
+| render timechart`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Top 10 Sites Across All Tenants</h3>
+                  <CodeBlock
+                    code={`SharePointStorageStats_CL
+| summarize arg_max(TimeGenerated, *) by SiteUrl_s
+| project TenantName_s, SiteTitle_s, SiteUrl_s, StorageUsedGB = StorageUsed_d / 1024, StorageLimitGB = StorageLimit_d / 1024, PercentageUsed_d
+| sort by StorageUsedGB desc
+| take 10`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Growth Rate Analysis by Tenant</h3>
                   <CodeBlock
                     code={`let startDate = ago(30d);
 let endDate = now();
 SharePointStorageStats_CL
 | where TimeGenerated >= startDate and TimeGenerated <= endDate
-| summarize StartStorageUsed = min(StorageUsed_d), EndStorageUsed = max(StorageUsed_d) by SiteUrl_s
-| extend GrowthMB = EndStorageUsed - StartStorageUsed
-| extend GrowthPercent = iff(StartStorageUsed > 0, (GrowthMB / StartStorageUsed) * 100, 0)
-| project SiteUrl_s, StartStorageUsed, EndStorageUsed, GrowthMB, GrowthPercent
-| order by GrowthMB desc`}
+| summarize 
+    StartStorage = min(StorageUsed_d),
+    EndStorage = max(StorageUsed_d)
+    by TenantName_s
+| extend GrowthMB = EndStorage - StartStorage
+| extend GrowthPercent = iff(StartStorage > 0, (GrowthMB / StartStorage) * 100, 0)
+| project 
+    TenantName = TenantName_s,
+    StartStorageGB = StartStorage / 1024,
+    EndStorageGB = EndStorage / 1024,
+    GrowthGB = GrowthMB / 1024,
+    GrowthPercent
+| sort by GrowthPercent desc`}
                   />
                 </div>
               </CardContent>
@@ -491,43 +817,57 @@ SharePointStorageStats_CL
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Common Issues</CardTitle>
+                <CardTitle>Common Multi-tenant Issues</CardTitle>
                 <CardDescription>Problems and their solutions</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <h3 className="font-medium">Authentication Failures</h3>
                   <p className="text-muted-foreground text-sm">
-                    If you're seeing authentication errors:
+                    If you're seeing authentication errors for specific tenants:
                   </p>
                   <ul className="list-disc pl-5 text-sm space-y-1">
-                    <li>Verify client secret hasn't expired</li>
-                    <li>Check that app has Sites.Read.All permissions</li>
-                    <li>Ensure admin consent was granted for the permissions</li>
+                    <li>Verify client secret hasn't expired for that tenant</li>
+                    <li>Check that the app in that tenant has Sites.Read.All permissions</li>
+                    <li>Ensure admin consent was granted for the permissions in each tenant</li>
+                    <li>Verify tenant ID is correct in the config file</li>
                   </ul>
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="font-medium">Missing Data</h3>
+                  <h3 className="font-medium">Missing Data from Specific Tenant</h3>
                   <p className="text-muted-foreground text-sm">
-                    If no data appears in Log Analytics:
+                    If data appears from some tenants but not others:
                   </p>
                   <ul className="list-disc pl-5 text-sm space-y-1">
-                    <li>Check function execution logs for errors</li>
-                    <li>Verify workspace ID and key are correct</li>
-                    <li>Ensure sites are accessible to the app identity</li>
+                    <li>Check function execution logs for tenant-specific errors</li>
+                    <li>Verify the tenant's SharePoint sites are accessible</li>
+                    <li>Test connection to that tenant's SharePoint sites manually</li>
+                    <li>Check if the secret for that tenant exists in Key Vault</li>
                   </ul>
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="font-medium">Module Installation Failures</h3>
+                  <h3 className="font-medium">Tenant List Not Processing</h3>
                   <p className="text-muted-foreground text-sm">
-                    If modules fail to install:
+                    If the tenant list isn't being processed correctly:
                   </p>
                   <ul className="list-disc pl-5 text-sm space-y-1">
-                    <li>Verify PowerShell execution policy</li>
-                    <li>Check for network connectivity</li>
-                    <li>Ensure function app has internet access</li>
+                    <li>Verify TenantsList JSON format is valid</li>
+                    <li>Check for malformed JSON in config file or environment variable</li>
+                    <li>Ensure all required properties are present for each tenant</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Function Timeout Issues</h3>
+                  <p className="text-muted-foreground text-sm">
+                    If the function times out with multiple tenants:
+                  </p>
+                  <ul className="list-disc pl-5 text-sm space-y-1">
+                    <li>Consider increasing the function timeout setting</li>
+                    <li>Split tenants into separate function instances if needed</li>
+                    <li>Optimize site collection list per tenant</li>
                   </ul>
                 </div>
               </CardContent>
@@ -535,54 +875,75 @@ SharePointStorageStats_CL
             
             <Card>
               <CardHeader>
-                <CardTitle>Diagnostic Steps</CardTitle>
-                <CardDescription>How to diagnose issues</CardDescription>
+                <CardTitle>Multi-tenant Diagnostic Steps</CardTitle>
+                <CardDescription>How to diagnose issues across tenants</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="font-medium">Check Function Logs</h3>
+                  <h3 className="font-medium">Check Tenant Processing</h3>
                   <p className="text-muted-foreground text-sm">
-                    Access logs via the Azure Portal:
-                  </p>
-                  <ol className="list-decimal pl-5 text-sm space-y-1">
-                    <li>Go to your Function App</li>
-                    <li>Navigate to Functions > SharePointStorageMonitor</li>
-                    <li>Select Monitor tab</li>
-                    <li>Review invocation logs</li>
-                  </ol>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="font-medium">Test Script Locally</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Run the script in your local environment:
+                    Verify which tenants are being processed:
                   </p>
                   <CodeBlock
-                    code={`# Set required environment variables
-$env:TenantId = "your-tenant-id"
-$env:ClientId = "your-client-id"
-# ... other variables
-
-# Run script with detailed logging
-./sharepoint-storage-monitor.ps1 -Verbose`}
+                    code={`# Check function logs for tenant processing
+Starting SharePoint Storage Monitor for multiple tenants
+Processing tenant: Contoso
+...
+Processing tenant: Fabrikam
+...`}
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <h3 className="font-medium">Verify Log Analytics Data</h3>
+                  <h3 className="font-medium">Test Individual Tenant Access</h3>
                   <p className="text-muted-foreground text-sm">
-                    Check if data is reaching Log Analytics:
+                    Isolate and test a single tenant:
+                  </p>
+                  <CodeBlock
+                    code={`# Create a test script for a single tenant
+$tenantId = "tenant-id"
+$clientId = "client-id"
+$clientSecret = "client-secret"
+$siteUrl = "https://tenant.sharepoint.com/sites/site1"
+
+# Create credential
+$secPassword = ConvertTo-SecureString $clientSecret -AsPlainText -Force
+$cred = New-Object System.Management.Automation.PSCredential ($clientId, $secPassword)
+
+# Test connection
+Connect-PnPOnline -Url $siteUrl -Credentials $cred
+Get-PnPWeb`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Verify Data by Tenant in Log Analytics</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Check which tenants are reporting data:
                   </p>
                   <CodeBlock
                     code={`SharePointStorageStats_CL
 | where TimeGenerated > ago(24h)
-| summarize count()`}
+| summarize count() by TenantName_s`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Key Vault Secret Access</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Verify Function App can access secrets for all tenants:
+                  </p>
+                  <CodeBlock
+                    code={`# Test Key Vault access in Azure Cloud Shell
+$keyVaultName = "your-keyvault-name"
+$functionAppIdentity = (Get-AzFunctionApp -ResourceGroupName "YourRG" -Name "YourFunctionApp").IdentityPrincipalId
+Get-AzKeyVaultAccessPolicy -VaultName $keyVaultName | Where-Object {$_.ObjectId -eq $functionAppIdentity}`}
                   />
                 </div>
               </CardContent>
               <CardFooter>
                 <p className="text-sm text-muted-foreground">
-                  If issues persist, check the function's Application Insights telemetry for detailed error information.
+                  If issues persist with a specific tenant, try removing it from the configuration temporarily to ensure other tenants continue working while you troubleshoot.
                 </p>
               </CardFooter>
             </Card>

@@ -1,68 +1,114 @@
-# SharePoint Storage Monitor - Planning Guide
+# SharePoint Storage Monitor - Multi-tenant Edition PRD
 
 ## Core Purpose & Success
-- **Mission Statement**: Create a PowerShell application that runs as an Azure Function to track and visualize SharePoint storage utilization over time.
-- **Success Indicators**: Consistent data collection, accurate visualization in Azure Monitor/Log Analytics, and proper error handling.
-- **Experience Qualities**: Reliable, Informative, Automated.
+- **Mission Statement**: A PowerShell-based Azure Function that automatically collects, tracks, and visualizes storage utilization across multiple SharePoint environments.
+- **Success Indicators**: Comprehensive visibility across all tenants, early warning for approaching storage limits, and trending analysis for capacity planning.
+- **Experience Qualities**: Reliable, Comprehensive, Secure.
 
 ## Project Classification & Approach
-- **Complexity Level**: Light Application (multiple features with basic state)
-- **Primary User Activity**: Consuming (viewing visualized data)
+- **Complexity Level**: Light Application (data collection with basic state management)
+- **Primary User Activity**: Consuming (viewing and analyzing data)
 
 ## Thought Process for Feature Selection
-- **Core Problem Analysis**: Organizations need to monitor SharePoint storage usage over time to manage capacity planning and understand growth patterns.
-- **User Context**: IT administrators will rely on this tool to track storage trends without manual intervention.
-- **Critical Path**: Function execution → SharePoint data collection → Data storage → Visualization in Azure Monitor
-- **Key Moments**: 
-  1. Automated data collection with secure authentication
-  2. Successful error handling and logging
-  3. Data visualization and trend analysis
+- **Core Problem Analysis**: Organizations with multiple SharePoint tenants lack centralized storage monitoring capabilities, making it difficult to track utilization trends across environments.
+- **User Context**: IT administrators will use this tool daily to monitor storage growth and identify potential issues before they impact users.
+- **Critical Path**: Function runs daily → collects data from multiple tenants → stores in Log Analytics → visualized in Azure Monitor dashboard.
+- **Key Moments**: Multi-tenant configuration setup, secure credential management, unified dashboard visualization.
 
 ## Essential Features
-1. **PowerShell Script for SharePoint Data Collection**
-   - What: PowerShell script that authenticates to SharePoint and retrieves storage metrics
-   - Why: Provides the raw data needed for analysis
-   - Success: Consistently retrieves accurate storage utilization data
 
-2. **Azure Function Integration**
-   - What: Configuration to run the PowerShell script as a daily Azure Function
-   - Why: Enables automated, scheduled execution without manual intervention
-   - Success: Reliable daily execution with appropriate timeouts and retry logic
+### Multi-tenant Data Collection
+- **Functionality**: Gather storage metrics from SharePoint sites across multiple tenant environments.
+- **Purpose**: Provide a unified view of storage utilization across the organization's entire SharePoint estate.
+- **Success Criteria**: Accurate data collection from all configured tenants with clear tenant identification in reports.
 
-3. **Secure Credential Management**
-   - What: Integration with Azure Key Vault or managed identities
-   - Why: Ensures sensitive credentials aren't hardcoded in scripts
-   - Success: No exposed credentials in code or logs
+### Secure Credential Management
+- **Functionality**: Store and access credentials securely for each tenant environment.
+- **Purpose**: Ensure sensitive client secrets are not exposed in code or configuration.
+- **Success Criteria**: All credentials stored in Azure Key Vault with appropriate access controls.
 
-4. **Error Handling and Logging**
-   - What: Comprehensive error handling with appropriate logging
-   - Why: Ensures reliability and troubleshooting capabilities
-   - Success: Clear error messages and recovery mechanisms
+### Error Handling and Resilience
+- **Functionality**: Graceful handling of tenant-specific failures without affecting other tenant data collection.
+- **Purpose**: Ensure partial success even if some tenants have connectivity or permission issues.
+- **Success Criteria**: Successful data collection from available tenants even when some fail.
 
-5. **Module Management**
-   - What: Logic to check for and install required PowerShell modules
-   - Why: Ensures the function has all dependencies without redundant installations
-   - Success: Script runs without module-related failures
+### Unified Visualization
+- **Functionality**: Cross-tenant dashboards and reports in Azure Monitor.
+- **Purpose**: Provide comparative analysis and unified view across all environments.
+- **Success Criteria**: Key visualizations showing tenant-specific and aggregated metrics.
 
-6. **Azure Monitor/Log Analytics Integration**
-   - What: Code to format and send data to Azure Monitor
-   - Why: Enables visualization and trend analysis
-   - Success: Data appears correctly in dashboards/charts
+### Flexible Deployment Options
+- **Functionality**: Automated deployment process with tenant configuration options.
+- **Purpose**: Simplify setup and management of multiple tenant monitoring.
+- **Success Criteria**: Single deployment script with multi-tenant configuration support.
 
-## Implementation Considerations
-- **Scalability Needs**: Solution should handle multiple SharePoint sites or large tenants
-- **Testing Focus**: Authentication flow, error scenarios, data consistency
-- **Critical Questions**: 
-  - What specific SharePoint metrics are most important to track?
-  - What is the ideal frequency for data collection?
-  - Are there any API rate limits to consider?
+## Design Direction
+
+### Visual Tone & Identity
+- **Emotional Response**: Confidence in system reliability and data accuracy.
+- **Design Personality**: Professional, technical, with clear information hierarchy.
+- **Visual Metaphors**: Dashboard elements that reflect storage concepts and multi-tenant architecture.
+- **Simplicity Spectrum**: Balanced interface with rich data visualizations but clean layout.
+
+### Color Strategy
+- **Color Scheme Type**: Limited palette focusing on data visualization best practices.
+- **Primary Color**: Deep blue (#2463EB) - represents reliability and security.
+- **Secondary Colors**: Muted grays for UI elements, distinct colors for tenant differentiation in charts.
+- **Accent Color**: Amber (#FFC107) for warnings and attention areas.
+- **Color Psychology**: Blues for trust, ambers for warnings, reds for critical alerts.
+- **Color Accessibility**: All color combinations meet WCAG AA contrast requirements.
+- **Foreground/Background Pairings**: Dark text on light backgrounds for readability in dashboard displays.
+
+### Typography System
+- **Font Pairing Strategy**: Single sans-serif system font for consistency and performance.
+- **Typographic Hierarchy**: Clear size distinction between headings, subheadings, and body text.
+- **Font Personality**: Clean, technical, legible at all sizes.
+- **Readability Focus**: Optimized for monitoring scenarios with appropriate spacing.
+- **Typography Consistency**: Consistent application across all components.
+- **Which fonts**: Inter for UI elements, JetBrains Mono for code snippets.
+- **Legibility Check**: Tested for readability at various screen sizes.
+
+### Visual Hierarchy & Layout
+- **Attention Direction**: Dashboard organized to highlight exceptions and trends first.
+- **White Space Philosophy**: Generous spacing between dashboard elements for clarity.
+- **Grid System**: Consistent card-based layout for dashboard elements.
+- **Responsive Approach**: Dashboard scales appropriately across desktop sizes.
+- **Content Density**: Balanced information density with clear section delineation.
+
+### Animations
+- **Purposeful Meaning**: Subtle transitions between dashboard views.
+- **Hierarchy of Movement**: Minimal animation focused on data updates.
+- **Contextual Appropriateness**: Animation limited to enhancing understanding of data changes.
+
+### UI Elements & Component Selection
+- **Component Usage**: Cards for dashboard elements, tabs for section organization.
+- **Component Customization**: Standard components with minimal customization.
+- **Component States**: Clear visual distinction between active and inactive states.
+- **Icon Selection**: Technical icons representing storage, dashboards, and monitoring concepts.
+- **Component Hierarchy**: Primary actions prominently displayed, secondary actions in menus.
+- **Spacing System**: Consistent spacing using a base 4px grid.
+- **Mobile Adaptation**: Dashboard optimized primarily for desktop viewing.
+
+### Visual Consistency Framework
+- **Design System Approach**: Component-based design with reusable patterns.
+- **Style Guide Elements**: Consistent card styling, button treatments, and data visualizations.
+- **Visual Rhythm**: Repeated patterns in dashboard layout for predictability.
+- **Brand Alignment**: Professional appearance aligned with enterprise IT tools.
+
+### Accessibility & Readability
+- **Contrast Goal**: WCAG AA compliance for all text and meaningful elements.
 
 ## Edge Cases & Problem Scenarios
-- **Potential Obstacles**: SharePoint API throttling, credential expiration, network issues
-- **Edge Case Handling**: Implement retry logic, timeout handling, and graceful degradation
-- **Technical Constraints**: Azure Function execution time limits, PowerShell module compatibility
+- **Potential Obstacles**: Expired credentials, permission changes, tenant connectivity issues.
+- **Edge Case Handling**: Graceful degradation when some tenants are unavailable.
+- **Technical Constraints**: Azure Function execution time limits for large environments.
+
+## Implementation Considerations
+- **Scalability Needs**: Support for dozens of tenants and thousands of sites.
+- **Testing Focus**: Validate multi-tenant authentication and data aggregation.
+- **Critical Questions**: How will the system handle very large tenants or network disruptions?
 
 ## Reflection
-- This approach is uniquely suited as it leverages Azure's native capabilities (Functions, Key Vault, Monitor) for a complete monitoring solution.
-- The automation eliminates the need for manual data collection while providing valuable insights through visualizations.
-- To make this solution exceptional, we should focus on comprehensive error handling and clear documentation.
+- This solution uniquely addresses the challenge of multi-tenant SharePoint monitoring by centralizing data collection while maintaining security boundaries between environments.
+- The assumption that all tenants will allow the same permission model should be validated early in implementation.
+- Exceptional implementation would include predictive analytics for storage growth forecasting across the entire estate.

@@ -1,0 +1,49 @@
+// Storage usage by tenant (pie chart)
+SharePointStorageStats_CL
+| summarize TotalStorageGB = sum(StorageUsed_d) / 1024 by TenantName_s
+| sort by TotalStorageGB desc
+| render piechart 
+
+// Storage utilization over time by tenant (line chart)
+SharePointStorageStats_CL
+| summarize AvgStorageUsedGB = sum(StorageUsed_d) / 1024 by TenantName_s, bin(TimeGenerated, 1d)
+| render timechart
+
+// Top 10 sites by storage across all tenants (table)
+SharePointStorageStats_CL
+| summarize arg_max(TimeGenerated, *) by SiteUrl_s
+| project TenantName_s, SiteTitle_s, SiteUrl_s, StorageUsedGB = StorageUsed_d / 1024, StorageLimitGB = StorageLimit_d / 1024, PercentageUsed_d
+| sort by StorageUsedGB desc
+| take 10
+
+// Growth rate by tenant (30 days)
+let startDate = ago(30d);
+let endDate = now();
+SharePointStorageStats_CL
+| where TimeGenerated >= startDate and TimeGenerated <= endDate
+| summarize 
+    StartStorage = min(StorageUsed_d),
+    EndStorage = max(StorageUsed_d)
+    by TenantName_s
+| extend GrowthMB = EndStorage - StartStorage
+| extend GrowthPercent = iff(StartStorage > 0, (GrowthMB / StartStorage) * 100, 0)
+| project 
+    TenantName = TenantName_s,
+    StartStorageGB = StartStorage / 1024,
+    EndStorageGB = EndStorage / 1024,
+    GrowthGB = GrowthMB / 1024,
+    GrowthPercent
+| sort by GrowthPercent desc
+
+// Site count by tenant
+SharePointStorageStats_CL
+| summarize arg_max(TimeGenerated, *) by SiteUrl_s, TenantName_s
+| summarize SiteCount=count() by TenantName_s
+| sort by SiteCount desc
+
+// Storage utilization heatmap by tenant and site
+SharePointStorageStats_CL
+| summarize arg_max(TimeGenerated, *) by SiteUrl_s
+| project TenantName_s, SiteTitle_s, PercentageUsed_d
+| sort by PercentageUsed_d desc
+| render heatmap
