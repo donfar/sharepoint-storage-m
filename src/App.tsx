@@ -1113,10 +1113,6 @@ stages:
             </Card>
           </div>
         </TabsContent>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
 
         <TabsContent value="dashboard">
           <div className="grid gap-6">
