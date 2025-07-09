@@ -29,7 +29,7 @@ function App() {
       </header>
 
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-7">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <Info weight="duotone" /> Overview
           </TabsTrigger>
@@ -41,6 +41,10 @@ function App() {
           </TabsTrigger>
           <TabsTrigger value="deployment" className="flex items-center gap-2">
             <Terminal weight="duotone" /> Deployment
+          </TabsTrigger>
+          <TabsTrigger value="cicd" className="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+            CI/CD
           </TabsTrigger>
           <TabsTrigger value="dashboard" className="hidden md:flex items-center gap-2">
             <LineChart weight="duotone" /> Dashboard
@@ -681,6 +685,429 @@ Successfully sent 4 total records to Log Analytics`}
                   <p>Run the function locally with the Azure Functions Core Tools:</p>
                   <CodeBlock code={`func start`} />
                 </div>
+        <TabsContent value="cicd">
+          <div className="grid gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>CI/CD Pipeline Options</CardTitle>
+                <CardDescription>Automated deployment options for SharePoint Storage Monitor</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p>
+                  SharePoint Storage Monitor supports automated deployment through industry-standard CI/CD platforms.
+                  Choose the option that best fits your development workflow:
+                </p>
+                
+                <div className="grid md:grid-cols-2 gap-6 mt-4">
+                  <div className="border rounded-md p-4 flex flex-col">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-accent/10 text-accent rounded-md p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"></path></svg>
+                      </div>
+                      <h3 className="font-medium text-lg">GitHub Actions</h3>
+                    </div>
+                    <p className="text-muted-foreground mb-4">
+                      Seamlessly integrate with GitHub repositories for automated deployment pipelines that run directly from your GitHub repository.
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 mb-4 flex-grow">
+                      <li>Built-in integration with GitHub repositories</li>
+                      <li>Easy setup with predefined workflow templates</li>
+                      <li>Environment-specific deployments (dev/test/prod)</li>
+                      <li>Secret management through GitHub Secrets</li>
+                    </ul>
+                    <Button variant="outline" className="mt-auto" onClick={() => document.getElementById('github-actions-setup')?.scrollIntoView({ behavior: 'smooth' })}>
+                      GitHub Actions Setup
+                    </Button>
+                  </div>
+                  
+                  <div className="border rounded-md p-4 flex flex-col">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-primary/10 text-primary rounded-md p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
+                      </div>
+                      <h3 className="font-medium text-lg">Azure DevOps</h3>
+                    </div>
+                    <p className="text-muted-foreground mb-4">
+                      Enterprise-grade CI/CD pipelines with advanced capabilities for complex deployment scenarios and integration with other Azure DevOps services.
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1 mb-4 flex-grow">
+                      <li>Comprehensive enterprise-grade pipelines</li>
+                      <li>Advanced approval workflows and gates</li>
+                      <li>Tight integration with Azure services</li>
+                      <li>Rich environment configuration options</li>
+                    </ul>
+                    <Button variant="outline" className="mt-auto" onClick={() => document.getElementById('azure-devops-setup')?.scrollIntoView({ behavior: 'smooth' })}>
+                      Azure DevOps Setup
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div id="github-actions-setup">
+              <Card>
+                <CardHeader>
+                  <CardTitle>GitHub Actions CI/CD Setup</CardTitle>
+                  <CardDescription>Automate deployment with GitHub Actions workflows</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">Prerequisites</h3>
+                    <ul className="list-disc pl-6 space-y-1">
+                      <li>GitHub repository with SharePoint Storage Monitor code</li>
+                      <li>Azure subscription with appropriate permissions</li>
+                      <li>Service principal with access to target resources</li>
+                    </ul>
+                    
+                    <div className="bg-muted p-4 rounded-md">
+                      <p className="text-sm mb-2 font-medium">Create a service principal for GitHub Actions:</p>
+                      <CodeBlock 
+                        code={`# Run this script to generate credentials for GitHub Actions
+./setup-cicd-prerequisites.ps1 \\
+  -SubscriptionId "your-subscription-id" \\
+  -ResourceGroupName "SharePointMonitor-RG" \\
+  -ServicePrincipalName "sp-sharepoint-monitor-cicd" \\
+  -OutputJsonPath "./sp-credentials.json"`}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">Repository Setup</h3>
+                    <p>
+                      Add the following GitHub Actions workflow file to your repository at <code>.github/workflows/azure-deploy.yml</code>:
+                    </p>
+                    <CodeBlock 
+                      code={`name: Deploy SharePoint Storage Monitor
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/sharepoint-storage-monitor/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+env:
+  AZURE_FUNCTIONAPP_NAME: sharepoint-storage-monitor-${{ github.event.inputs.environment || 'dev' }}
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/sharepoint-storage-monitor'
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup PowerShell Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.0.x'
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    # Additional deployment steps...`}
+                    />
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">GitHub Secrets Configuration</h3>
+                    <p>
+                      Add these secrets to your GitHub repository settings:
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">AZURE_CREDENTIALS</h4>
+                        <p className="text-sm text-muted-foreground">
+                          JSON content from the service principal credentials file (from setup script)
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">RESOURCE_GROUP</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Name of the target Azure resource group
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">LOCATION</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Azure region (e.g., eastus)
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">KEY_VAULT_NAME</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Name of your Azure Key Vault
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">WORKSPACE_ID</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Log Analytics workspace ID
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">WORKSPACE_KEY</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Log Analytics workspace key
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3 md:col-span-2">
+                        <h4 className="font-medium mb-1">TENANT_CONFIG</h4>
+                        <p className="text-sm text-muted-foreground">
+                          JSON array containing tenant configurations (without secrets)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => handleCopyFile("View the complete GitHub Actions workflow in src/sharepoint-storage-monitor/.github/workflows/azure-deploy.yml")}>
+                    <Copy className="mr-2 h-4 w-4" /> Copy Full GitHub Actions Workflow
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+            
+            <div id="azure-devops-setup">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Azure DevOps CI/CD Setup</CardTitle>
+                  <CardDescription>Enterprise pipeline for automated deployment</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">Create Azure DevOps Pipeline</h3>
+                    <p>
+                      Add an <code>azure-pipelines.yml</code> file to your repository:
+                    </p>
+                    <CodeBlock 
+                      code={`trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/sharepoint-storage-monitor/**
+
+parameters:
+- name: environment
+  displayName: Environment
+  type: string
+  default: dev
+  values:
+  - dev
+  - test
+  - prod
+
+variables:
+  functionAppName: 'sharepoint-storage-monitor-${{ parameters.environment }}'
+  functionAppPath: '$(System.DefaultWorkingDirectory)/src/sharepoint-storage-monitor'
+  vmImageName: 'windows-latest'
+  resourceGroupName: 'SharePointMonitor-${{ parameters.environment }}-RG'
+
+stages:
+- stage: Build
+  displayName: Build and Package
+  jobs:
+  - job: BuildPackage
+    displayName: Build and Package Function App
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: PowerShell@2
+      displayName: Install Required Modules
+      # Additional steps...
+
+- stage: Deploy
+  displayName: Deploy to ${{ parameters.environment }}
+  # Deployment steps...`}
+                    />
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">Service Connections</h3>
+                    <p>
+                      Configure service connections in your Azure DevOps project:
+                    </p>
+                    <ol className="list-decimal pl-6 space-y-2">
+                      <li>Go to Project Settings > Service Connections</li>
+                      <li>Create an Azure Resource Manager connection</li>
+                      <li>Name it <code>serviceconnection-dev</code></li>
+                      <li>Create additional connections for other environments (<code>serviceconnection-test</code>, <code>serviceconnection-prod</code>)</li>
+                    </ol>
+                    <div className="bg-muted p-4 rounded-md mt-2">
+                      <p className="text-sm font-medium">Service Connection Naming Convention:</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        The pipeline expects service connections named <code>serviceconnection-dev</code>, <code>serviceconnection-test</code>, and <code>serviceconnection-prod</code>. 
+                        This naming convention allows the pipeline to dynamically select the appropriate service connection based on the target environment.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">Pipeline Variables</h3>
+                    <p>
+                      Set up these variables in your Azure DevOps pipeline:
+                    </p>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">keyVaultName</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Name of your Azure Key Vault
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">workspaceId</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Log Analytics workspace ID
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">workspaceKey</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Log Analytics workspace key (mark as secret)
+                        </p>
+                      </div>
+                      <div className="border rounded-md p-3">
+                        <h4 className="font-medium mb-1">tenantConfig</h4>
+                        <p className="text-sm text-muted-foreground">
+                          JSON string with tenant configurations (mark as secret)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-lg">Environment Configuration</h3>
+                    <p>
+                      Create and configure environments in Azure DevOps:
+                    </p>
+                    <ol className="list-decimal pl-6 space-y-2">
+                      <li>Go to Pipelines > Environments</li>
+                      <li>Create environments named <code>dev</code>, <code>test</code>, and <code>prod</code></li>
+                      <li>For <code>test</code> and <code>prod</code>, add approval requirements:</li>
+                    </ol>
+                    <div className="bg-muted p-4 rounded-md mt-2">
+                      <p className="text-sm font-medium">Environment Approval Configuration:</p>
+                      <ul className="list-disc pl-4 text-xs text-muted-foreground mt-1 space-y-1">
+                        <li>Select the environment and click "Approvals and checks"</li>
+                        <li>Add an "Approvals" check</li>
+                        <li>Specify required approvers</li>
+                        <li>Set timeout (e.g., 7 days)</li>
+                        <li>Optional: Add instructions for approvers</li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => handleCopyFile("View the complete Azure DevOps pipeline in src/sharepoint-storage-monitor/azure-pipelines.yml")}>
+                    <Copy className="mr-2 h-4 w-4" /> Copy Full Azure DevOps Pipeline
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Best Practices</CardTitle>
+                <CardDescription>Secure CI/CD implementation guidelines</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Secure Secret Management</h3>
+                      <p className="text-muted-foreground">
+                        Store all sensitive information (client secrets, connection strings) in secure secret stores like GitHub Secrets or Azure Key Vault.
+                        Never include secrets directly in code or configuration files.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m9 9 6 6"></path><path d="m9 15 6-6"></path></svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Principle of Least Privilege</h3>
+                      <p className="text-muted-foreground">
+                        Service principals and identities should have only the minimum permissions needed. 
+                        Use scoped access to specific resource groups rather than subscription-level permissions.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path></svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Environment Isolation</h3>
+                      <p className="text-muted-foreground">
+                        Maintain strict isolation between environments (dev/test/prod) using separate resource groups,
+                        service principals, and approval processes for production deployments.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"></rect><path d="M12 17v4"></path><path d="M8 21h8"></path><path d="M15 8a3 3 0 1 0-3 3"></path></svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Secret Rotation</h3>
+                      <p className="text-muted-foreground">
+                        Implement a regular schedule for rotating client secrets, service principal credentials, and other sensitive information.
+                        Automate the rotation process where possible.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-primary/10 text-primary rounded-md p-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M8 14H3v7h7v-5h5V9h-7z"></path></svg>
+                    </div>
+                    <div>
+                      <h3 className="font-medium">Pipeline Security Scanning</h3>
+                      <p className="text-muted-foreground">
+                        Integrate security scanning tools into your pipelines to detect vulnerabilities, secrets in code,
+                        and insecure configurations before deployment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
               </CardContent>
             </Card>
           </div>

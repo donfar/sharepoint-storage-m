@@ -1,0 +1,136 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - src/sharepoint-storage-monitor/**
+
+parameters:
+- name: environment
+  displayName: Environment
+  type: string
+  default: dev
+  values:
+  - dev
+  - test
+  - prod
+
+variables:
+  functionAppName: 'sharepoint-storage-monitor-${{ parameters.environment }}'
+  functionAppPath: '$(System.DefaultWorkingDirectory)/src/sharepoint-storage-monitor'
+  vmImageName: 'windows-latest'
+  resourceGroupName: 'SharePointMonitor-${{ parameters.environment }}-RG'
+  location: 'eastus'
+
+stages:
+- stage: Build
+  displayName: Build and Package
+  jobs:
+  - job: BuildPackage
+    displayName: Build and Package Function App
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: PowerShell@2
+      displayName: Install Required PowerShell Modules
+      inputs:
+        targetType: 'inline'
+        script: |
+          Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force -ErrorAction Stop
+          Install-Module -Name PnP.PowerShell -Scope CurrentUser -Repository PSGallery -Force -ErrorAction Stop
+        pwsh: true
+    
+    - task: ArchiveFiles@2
+      displayName: 'Archive Function App Files'
+      inputs:
+        rootFolderOrFile: '$(functionAppPath)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/function.zip'
+        replaceExistingArchive: true
+    
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Function App Artifact'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'function-app'
+        publishLocation: 'Container'
+
+- stage: Deploy
+  displayName: Deploy to ${{ parameters.environment }}
+  dependsOn: Build
+  jobs:
+  - deployment: DeployInfrastructure
+    displayName: Deploy Infrastructure
+    environment: ${{ parameters.environment }}
+    pool:
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          
+          - task: AzurePowerShell@5
+            displayName: 'Deploy Infrastructure'
+            inputs:
+              azureSubscription: 'serviceconnection-${{ parameters.environment }}'
+              ScriptPath: '$(System.DefaultWorkingDirectory)/src/sharepoint-storage-monitor/deploy.ps1'
+              ScriptArguments: >
+                -ResourceGroupName "$(resourceGroupName)"
+                -Location "$(location)"
+                -FunctionAppName "$(functionAppName)"
+                -KeyVaultName "$(keyVaultName)"
+                -WorkspaceId "$(workspaceId)"
+                -WorkspaceKey "$(workspaceKey)"
+                -LogName "SharePointStorageStats"
+              azurePowerShellVersion: 'LatestVersion'
+              pwsh: true
+            env:
+              keyVaultName: $(keyVaultName)
+              workspaceId: $(workspaceId)
+              workspaceKey: $(workspaceKey)
+          
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy Function App'
+            inputs:
+              azureSubscription: 'serviceconnection-${{ parameters.environment }}'
+              appType: 'functionApp'
+              appName: '$(functionAppName)'
+              package: '$(Pipeline.Workspace)/function-app/function.zip'
+              deploymentMethod: 'auto'
+          
+          - task: AzurePowerShell@5
+            displayName: 'Configure Tenants'
+            inputs:
+              azureSubscription: 'serviceconnection-${{ parameters.environment }}'
+              ScriptType: 'InlineScript'
+              Inline: |
+                # Load tenant configuration from pipeline variable
+                $tenantConfig = $env:TENANT_CONFIG | ConvertFrom-Json
+                
+                # Get KeyVault
+                $keyVault = Get-AzKeyVault -VaultName "$(keyVaultName)"
+                
+                foreach ($tenant in $tenantConfig) {
+                  $secretName = $tenant.SecretName
+                  $secretValue = ConvertTo-SecureString $tenant.SecretValue -AsPlainText -Force
+                  
+                  # Store the secret in KeyVault
+                  Set-AzKeyVaultSecret -VaultName $keyVault.VaultName -Name $secretName -SecretValue $secretValue
+                }
+                
+                # Update function app with tenant list (but without secrets)
+                $tenantConfigForApp = $tenantConfig | Select-Object -Property TenantId, TenantName, ClientId, SecretName, SharePointSites
+                $tenantConfigJson = $tenantConfigForApp | ConvertTo-Json -Depth 10 -Compress
+                
+                $functionAppSettings = @{
+                  "TenantsList" = $tenantConfigJson
+                }
+                
+                Update-AzFunctionAppSetting -ResourceGroupName "$(resourceGroupName)" -Name "$(functionAppName)" -AppSetting $functionAppSettings
+              azurePowerShellVersion: 'LatestVersion'
+              pwsh: true
+            env:
+              TENANT_CONFIG: $(tenantConfig)

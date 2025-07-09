@@ -45,7 +45,7 @@
 ### DevOps Integration
 - **Functionality**: Integration with CI/CD pipelines for automated deployment and updates.
 - **Purpose**: Enable enterprise-grade deployment practices and version control.
-- **Success Criteria**: Working CI/CD scripts with secure secret management.
+- **Success Criteria**: Working CI/CD scripts with secure secret management, supporting both GitHub Actions and Azure DevOps pipelines.
 
 ## Design Direction
 
