@@ -717,6 +717,20 @@ Successfully sent 4 total records to Log Analytics`}
                         </div>
                       </div>
                     </div>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
+                        <div className="text-sm font-medium mb-1">Tenant Connection Status</div>
+                        <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
+                          [Status visualization with success/failure metrics]
+                        </div>
+                      </div>
+                      <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
+                        <div className="text-sm font-medium mb-1">Error Trends by Category</div>
+                        <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
+                          [Error category breakdown chart]
+                        </div>
+                      </div>
+                    </div>
                     <div className="bg-card border rounded-md p-3 h-32 flex flex-col">
                       <div className="text-sm font-medium mb-1">Top Sites Across All Tenants</div>
                       <div className="flex-1 flex items-center justify-center text-muted-foreground text-xs">
@@ -787,6 +801,37 @@ Successfully sent 4 total records to Log Analytics`}
                 </div>
                 
                 <div className="space-y-2">
+                  <h3 className="font-medium">Connection Error Monitoring</h3>
+                  <CodeBlock
+                    code={`SharePointStorageErrors_CL
+| where TimeGenerated > ago(7d)
+| where Status_s == "Failed" or Status_s == "TenantFailed"
+| extend ErrorType = tostring(extract("(AccessDenied|Timeout|NotFound|NetworkIssue|Credentials)", 1, ErrorMessage_s))
+| extend ErrorType = iif(isempty(ErrorType), "Other", ErrorType)
+| summarize ErrorCount=count() by ErrorType, TenantName_s, bin(TimeGenerated, 1d)
+| render timechart`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Tenant Health Summary</h3>
+                  <CodeBlock
+                    code={`// Sites by connection status
+let data = SharePointStorageStats_CL
+| where TimeGenerated > ago(24h)
+| extend Status = "Success";
+let errors = SharePointStorageErrors_CL
+| where TimeGenerated > ago(24h)
+| extend Status = "Failed";
+union data, errors
+| summarize SuccessCount=countif(Status=="Success"), FailCount=countif(Status=="Failed") by TenantName_s
+| extend SuccessRate = 100.0 * SuccessCount / (SuccessCount + FailCount)
+| project TenantName_s, SuccessCount, FailCount, SuccessRate
+| sort by SuccessRate asc`}
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <h3 className="font-medium">Growth Rate Analysis by Tenant</h3>
                   <CodeBlock
                     code={`let startDate = ago(30d);
@@ -815,6 +860,56 @@ SharePointStorageStats_CL
         
         <TabsContent value="troubleshooting">
           <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Enhanced Error Handling</CardTitle>
+                <CardDescription>New resilient multi-tenant features</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="font-medium">Tenant Connection Resilience</h3>
+                  <p className="text-muted-foreground text-sm">
+                    The script now includes improved error handling for tenant connections:
+                  </p>
+                  <ul className="list-disc pl-5 text-sm space-y-1">
+                    <li>Automatic retry attempts for failed tenant connections</li>
+                    <li>Independent processing for each tenant to prevent cascading failures</li>
+                    <li>Detailed error logging with error categorization</li>
+                    <li>Configurable retry parameters in the config file</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Configuration Options</h3>
+                  <p className="text-muted-foreground text-sm">
+                    New configuration settings for error handling:
+                  </p>
+                  <CodeBlock
+                    code={`{
+  "MaxRetries": 3,         // Number of retry attempts for failed operations
+  "RetryDelaySeconds": 5,  // Delay between retry attempts
+  "LogErrors": true,       // Enable error logging to Log Analytics
+  "ErrorLogName": "SharePointStorageErrors"  // Custom log name for errors
+}`}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="font-medium">Error Categorization</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Errors are now categorized for better troubleshooting:
+                  </p>
+                  <ul className="list-disc pl-5 text-sm space-y-1">
+                    <li><strong>AccessDenied</strong>: Permission issues</li>
+                    <li><strong>Timeout</strong>: Connection or operation timeouts</li>
+                    <li><strong>NotFound</strong>: Resources not found</li>
+                    <li><strong>NetworkIssue</strong>: Connectivity problems</li>
+                    <li><strong>Credentials</strong>: Authentication failures</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader>
                 <CardTitle>Common Multi-tenant Issues</CardTitle>

@@ -19,6 +19,11 @@ if (Test-Path $configPath) {
         LogName = $env:LogName ?? "SharePointStorageStats"
         KeyVaultName = $env:KeyVaultName
         Tenants = @()
+        # Error handling configuration
+        MaxRetries = $env:MaxRetries ?? 3
+        RetryDelaySeconds = $env:RetryDelaySeconds ?? 5
+        LogErrors = $env:LogErrors -eq "true"
+        ErrorLogName = $env:ErrorLogName
     }
 
     # If tenants are provided via environment variable
@@ -83,36 +88,56 @@ function Get-SecureCredentials {
         [string]$TenantId,
         [string]$ClientId,
         [string]$KeyVaultName,
-        [string]$SecretName
+        [string]$SecretName,
+        [int]$MaxRetries = 3,
+        [int]$RetryDelaySeconds = 5
     )
     
-    try {
-        # Ensure Azure modules are installed
-        Ensure-Module -ModuleName "Az.Accounts"
-        Ensure-Module -ModuleName "Az.KeyVault"
-        
-        # Connect to Azure
-        Write-Verbose "Connecting to Azure with managed identity"
-        Connect-AzAccount -Identity -Tenant $TenantId | Out-Null
-        
-        # Get secret from Key Vault
-        Write-Verbose "Getting secret $SecretName from Key Vault $KeyVaultName"
-        $secret = Get-AzKeyVaultSecret -VaultName $KeyVaultName -Name $SecretName
-        
-        if (-not $secret) {
-            throw "Secret $SecretName not found in Key Vault $KeyVaultName"
+    $retryCount = 0
+    $success = $false
+    $lastError = $null
+    
+    while (-not $success -and $retryCount -lt $MaxRetries) {
+        try {
+            # Ensure Azure modules are installed
+            Ensure-Module -ModuleName "Az.Accounts"
+            Ensure-Module -ModuleName "Az.KeyVault"
+            
+            # Connect to Azure
+            Write-Verbose "Connecting to Azure with managed identity (Attempt $($retryCount + 1))"
+            Connect-AzAccount -Identity -Tenant $TenantId -ErrorAction Stop | Out-Null
+            
+            # Get secret from Key Vault
+            Write-Verbose "Getting secret $SecretName from Key Vault $KeyVaultName"
+            $secret = Get-AzKeyVaultSecret -VaultName $KeyVaultName -Name $SecretName -ErrorAction Stop
+            
+            if (-not $secret) {
+                throw "Secret $SecretName not found in Key Vault $KeyVaultName"
+            }
+            
+            $secretText = $secret.SecretValue | ConvertFrom-SecureString -AsPlainText
+            
+            # Create credential object
+            $password = ConvertTo-SecureString -String $secretText -AsPlainText -Force
+            $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ClientId, $password
+            
+            $success = $true
+            return $credential
         }
-        
-        $secretText = $secret.SecretValue | ConvertFrom-SecureString -AsPlainText
-        
-        # Create credential object
-        $password = ConvertTo-SecureString -String $secretText -AsPlainText -Force
-        $credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $ClientId, $password
-        
-        return $credential
+        catch {
+            $lastError = $_
+            $retryCount++
+            
+            if ($retryCount -lt $MaxRetries) {
+                $errorType = if ($_.Exception.GetType().Name) { $_.Exception.GetType().Name } else { "Unknown" }
+                Write-Warning "Attempt $retryCount of $MaxRetries failed when getting credentials for tenant $TenantId. Error type: $errorType. Retrying in $RetryDelaySeconds seconds..."
+                Start-Sleep -Seconds $RetryDelaySeconds
+            }
+        }
     }
-    catch {
-        throw "Error getting credentials from Key Vault: $_"
+    
+    if (-not $success) {
+        throw "Failed to get credentials after $MaxRetries attempts from Key Vault for tenant $TenantId. Last error: $lastError"
     }
 }
 
@@ -122,7 +147,9 @@ function Get-SharePointStorageStats {
         [string]$TenantId,
         [string]$TenantName,
         [System.Management.Automation.PSCredential]$Credential,
-        [string[]]$SiteUrls
+        [string[]]$SiteUrls,
+        [int]$MaxSiteRetries = 2,
+        [int]$RetryDelaySeconds = 10
     )
     
     try {
@@ -130,39 +157,127 @@ function Get-SharePointStorageStats {
         Ensure-Module -ModuleName "PnP.PowerShell" -MinimumVersion "1.12.0"
         
         $results = @()
+        $siteErrors = @()
+        $successCount = 0
+        $failureCount = 0
         
         foreach ($siteUrl in $SiteUrls) {
-            try {
-                Write-Verbose "Connecting to SharePoint site: $siteUrl"
-                Connect-PnPOnline -Url $siteUrl -Credentials $Credential
+            $retryCount = 0
+            $siteSuccess = $false
+            $lastError = $null
+            
+            while (-not $siteSuccess -and $retryCount -le $MaxSiteRetries) {
+                try {
+                    if ($retryCount -gt 0) {
+                        Write-Verbose "Retry attempt $retryCount for site: $siteUrl"
+                    }
+                    
+                    Write-Verbose "Connecting to SharePoint site: $siteUrl"
+                    Connect-PnPOnline -Url $siteUrl -Credentials $Credential -ErrorAction Stop
+                    
+                    # Get site information with timeout handling
+                    $timeoutTask = [System.Threading.Tasks.Task]::Run({
+                        try {
+                            $site = Get-PnPSite -Includes StorageMaximumLevel, StorageUsage, StorageWarningLevel -ErrorAction Stop
+                            $web = Get-PnPWeb -Includes Title -ErrorAction Stop
+                            return @{ Site = $site; Web = $web }
+                        }
+                        catch {
+                            throw $_
+                        }
+                    })
+                    
+                    # Wait for the task with a timeout
+                    if (-not [System.Threading.Tasks.Task]::WaitAll(@($timeoutTask), 30000)) {
+                        throw "Operation timed out after 30 seconds when getting site information"
+                    }
+                    
+                    $siteData = $timeoutTask.Result
+                    $site = $siteData.Site
+                    $web = $siteData.Web
+                    
+                    # Format results for Log Analytics
+                    $resultObject = [PSCustomObject]@{
+                        TenantId = $TenantId
+                        TenantName = $TenantName
+                        SiteUrl = $siteUrl
+                        SiteTitle = $web.Title
+                        StorageUsed = [math]::Round($site.StorageUsage / 1024, 2)  # Convert to MB
+                        StorageLimit = [math]::Round($site.StorageMaximumLevel / 1024, 2)  # Convert to MB
+                        StorageWarning = [math]::Round($site.StorageWarningLevel / 1024, 2)  # Convert to MB
+                        PercentageUsed = [math]::Round(($site.StorageUsage / $site.StorageMaximumLevel) * 100, 2)
+                        CollectionDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                        Status = "Success"
+                    }
+                    
+                    $results += $resultObject
+                    $successCount++
+                    $siteSuccess = $true
+                    Write-Verbose "Successfully collected data for site: $siteUrl"
+                }
+                catch {
+                    $lastError = $_
+                    $retryCount++
+                    
+                    # Categorize the error
+                    $errorCategory = "Unknown"
+                    $errorMessage = $_.Exception.Message
+                    
+                    if ($errorMessage -match "Access denied|Unauthorized|401|403") {
+                        $errorCategory = "AccessDenied"
+                    }
+                    elseif ($errorMessage -match "timeout|timed out") {
+                        $errorCategory = "Timeout"
+                    }
+                    elseif ($errorMessage -match "not found|404|doesn't exist") {
+                        $errorCategory = "NotFound"
+                    }
+                    elseif ($errorMessage -match "network|connectivity|connection") {
+                        $errorCategory = "NetworkIssue"
+                    }
+                    
+                    if ($retryCount -le $MaxSiteRetries) {
+                        Write-Warning "Attempt $retryCount of $MaxSiteRetries failed for site $siteUrl in tenant $TenantName. Error category: $errorCategory. Retrying in $RetryDelaySeconds seconds..."
+                        Start-Sleep -Seconds $RetryDelaySeconds
+                    }
+                }
+                finally {
+                    # Always try to disconnect, but don't throw if it fails
+                    try {
+                        Disconnect-PnPOnline -ErrorAction SilentlyContinue
+                    }
+                    catch {
+                        # Just continue if disconnect fails
+                    }
+                }
+            }
+            
+            if (-not $siteSuccess) {
+                $failureCount++
                 
-                # Get site information
-                $site = Get-PnPSite -Includes StorageMaximumLevel, StorageUsage, StorageWarningLevel
-                $web = Get-PnPWeb -Includes Title
-                
-                # Format results for Log Analytics
-                $resultObject = [PSCustomObject]@{
+                # Add error info to results for tracking
+                $errorResult = [PSCustomObject]@{
                     TenantId = $TenantId
                     TenantName = $TenantName
                     SiteUrl = $siteUrl
-                    SiteTitle = $web.Title
-                    StorageUsed = [math]::Round($site.StorageUsage / 1024, 2)  # Convert to MB
-                    StorageLimit = [math]::Round($site.StorageMaximumLevel / 1024, 2)  # Convert to MB
-                    StorageWarning = [math]::Round($site.StorageWarningLevel / 1024, 2)  # Convert to MB
-                    PercentageUsed = [math]::Round(($site.StorageUsage / $site.StorageMaximumLevel) * 100, 2)
+                    SiteTitle = "Error"
                     CollectionDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                    Status = "Failed"
+                    ErrorMessage = $lastError.Exception.Message
                 }
                 
-                $results += $resultObject
-                Write-Verbose "Collected data for site: $siteUrl"
+                $siteErrors += $errorResult
+                Write-Error "Failed to collect data for site $siteUrl in tenant $TenantName after $MaxSiteRetries retries. Error: $lastError"
             }
-            catch {
-                Write-Error "Error getting stats for site $siteUrl in tenant $TenantName`: $_"
-            }
-            finally {
-                # Disconnect from SharePoint site
-                Disconnect-PnPOnline
-            }
+        }
+        
+        # Log statistics
+        Write-Verbose "Tenant $TenantName processing complete. Success: $successCount, Failed: $failureCount"
+        
+        # If we have site errors, we can log them for monitoring
+        if ($siteErrors.Count -gt 0) {
+            Write-Verbose "Returning $($results.Count) successful results and $($siteErrors.Count) error records"
+            return $results, $siteErrors
         }
         
         return $results
@@ -252,6 +367,8 @@ function Send-LogAnalyticsData {
 try {
     Write-Output "Starting SharePoint Storage Monitor for multiple tenants"
     $totalResults = @()
+    $totalErrors = @()
+    $tenantResults = @{}
     
     # Verify configuration
     if (-not $config.Tenants -or $config.Tenants.Count -eq 0) {
@@ -262,39 +379,169 @@ try {
         throw "Log Analytics workspace ID and key are required."
     }
     
+    # Initialize result tracking
+    $tenantStats = @{
+        TotalTenants = $config.Tenants.Count
+        ProcessedTenants = 0
+        SuccessfulTenants = 0
+        FailedTenants = 0
+        TotalSitesAttempted = 0
+        TotalSitesSuccessful = 0
+        TenantDetails = @{}
+    }
+    
     # Process each tenant
     foreach ($tenant in $config.Tenants) {
+        $tenantStats.ProcessedTenants++
+        $tenantId = $tenant.TenantId
+        $tenantName = $tenant.TenantName
+        
+        # Initialize tenant tracking
+        $tenantStats.TenantDetails[$tenantName] = @{
+            Status = "Processing"
+            SitesAttempted = $tenant.SharePointSites.Count
+            SitesSuccessful = 0
+            ErrorType = ""
+            ErrorMessage = ""
+            StartTime = Get-Date
+        }
+        
         try {
-            Write-Output "Processing tenant: $($tenant.TenantName)"
+            Write-Output "Processing tenant: $tenantName (Tenant $($tenantStats.ProcessedTenants) of $($tenantStats.TotalTenants))"
             
-            # Get credentials from Key Vault
-            $credential = Get-SecureCredentials -TenantId $tenant.TenantId -ClientId $tenant.ClientId -KeyVaultName $config.KeyVaultName -SecretName $tenant.SecretName
+            # Track sites for this tenant
+            $tenantStats.TotalSitesAttempted += $tenant.SharePointSites.Count
+            
+            # Get credentials from Key Vault with retry logic
+            Write-Output "  Getting credentials for tenant: $tenantName"
+            $credential = $null
+            try {
+                $credential = Get-SecureCredentials -TenantId $tenantId -ClientId $tenant.ClientId -KeyVaultName $config.KeyVaultName -SecretName $tenant.SecretName
+            }
+            catch {
+                $errorMsg = "Failed to get credentials for tenant $tenantName`: $_"
+                Write-Error $errorMsg
+                $tenantStats.TenantDetails[$tenantName].Status = "Failed"
+                $tenantStats.TenantDetails[$tenantName].ErrorType = "Credentials"
+                $tenantStats.TenantDetails[$tenantName].ErrorMessage = $errorMsg
+                $tenantStats.FailedTenants++
+                continue
+            }
             
             # Get SharePoint storage statistics
-            $storageData = Get-SharePointStorageStats -TenantId $tenant.TenantId -TenantName $tenant.TenantName -Credential $credential -SiteUrls $tenant.SharePointSites
+            Write-Output "  Collecting storage data from $($tenant.SharePointSites.Count) sites in tenant: $tenantName"
+            $storageResults = Get-SharePointStorageStats -TenantId $tenantId -TenantName $tenantName -Credential $credential -SiteUrls $tenant.SharePointSites
             
+            # Handle different return types (normal array vs array with errors)
+            $storageData = @()
+            $errorData = @()
+            
+            if ($storageResults -is [array] -and $storageResults.Count -eq 2) {
+                # We have a split return with [results, errors]
+                $storageData = $storageResults[0]
+                $errorData = $storageResults[1]
+            }
+            else {
+                # Just regular results
+                $storageData = $storageResults
+            }
+            
+            # Update tenant statistics
+            $tenantStats.TenantDetails[$tenantName].SitesSuccessful = $storageData.Count
+            $tenantStats.TotalSitesSuccessful += $storageData.Count
+            
+            # Process results
             if ($storageData.Count -gt 0) {
                 $totalResults += $storageData
-                Write-Output "Collected data from $($storageData.Count) sites in tenant $($tenant.TenantName)"
-            } else {
-                Write-Warning "No data collected from tenant $($tenant.TenantName)"
+                $tenantResults[$tenantName] = $storageData
+                $tenantStats.SuccessfulTenants++
+                $tenantStats.TenantDetails[$tenantName].Status = "Success"
+                Write-Output "  Collected data from $($storageData.Count) sites in tenant $tenantName"
+                
+                # If we had some errors but also some successes
+                if ($errorData.Count -gt 0) {
+                    Write-Warning "  Failed to collect data from $($errorData.Count) sites in tenant $tenantName"
+                    $totalErrors += $errorData
+                }
+            } 
+            else {
+                Write-Warning "  No data collected from tenant $tenantName"
+                $tenantStats.TenantDetails[$tenantName].Status = "NoData"
+                
+                if ($errorData.Count -gt 0) {
+                    Write-Warning "  Failed to collect data from all $($errorData.Count) sites in tenant $tenantName"
+                    $totalErrors += $errorData
+                    $tenantStats.FailedTenants++
+                }
             }
         }
         catch {
-            Write-Error "Error processing tenant $($tenant.TenantName): $_"
-            # Continue with next tenant
+            $errorMsg = "Error processing tenant $tenantName`: $_"
+            Write-Error $errorMsg
+            $tenantStats.FailedTenants++
+            $tenantStats.TenantDetails[$tenantName].Status = "Failed"
+            $tenantStats.TenantDetails[$tenantName].ErrorType = "Processing"
+            $tenantStats.TenantDetails[$tenantName].ErrorMessage = $errorMsg
+            
+            # Create an error entry for logging
+            $errorEntry = [PSCustomObject]@{
+                TenantId = $tenantId
+                TenantName = $tenantName
+                CollectionDate = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+                Status = "TenantFailed"
+                ErrorMessage = $_.Exception.Message
+            }
+            $totalErrors += $errorEntry
+        }
+        finally {
+            $tenantStats.TenantDetails[$tenantName].EndTime = Get-Date
+            $tenantStats.TenantDetails[$tenantName].Duration = [math]::Round(($tenantStats.TenantDetails[$tenantName].EndTime - $tenantStats.TenantDetails[$tenantName].StartTime).TotalSeconds, 1)
         }
     }
     
-    # Send all data to Log Analytics
+    # Send all success data to Log Analytics
     if ($totalResults.Count -gt 0) {
+        Write-Output "Sending $($totalResults.Count) data records to Log Analytics"
         Send-LogAnalyticsData -WorkspaceId $config.WorkspaceId -WorkspaceKey $config.WorkspaceKey -LogName $config.LogName -Data $totalResults
-        Write-Output "Successfully sent $($totalResults.Count) total records to Log Analytics"
     } else {
-        Write-Warning "No data was collected from any tenant"
+        Write-Warning "No successful data was collected from any tenant"
+    }
+    
+    # Send error data to Log Analytics if configured
+    if ($totalErrors.Count -gt 0 -and $config.LogErrors -ne $false) {
+        $errorLogName = $config.ErrorLogName ?? ($config.LogName + "Errors")
+        Write-Output "Sending $($totalErrors.Count) error records to Log Analytics as '$errorLogName'"
+        Send-LogAnalyticsData -WorkspaceId $config.WorkspaceId -WorkspaceKey $config.WorkspaceKey -LogName $errorLogName -Data $totalErrors
+    }
+    
+    # Output summary
+    Write-Output ""
+    Write-Output "--- Execution Summary ---"
+    Write-Output "Tenants processed: $($tenantStats.ProcessedTenants) of $($tenantStats.TotalTenants)"
+    Write-Output "Successful tenants: $($tenantStats.SuccessfulTenants)"
+    Write-Output "Failed tenants: $($tenantStats.FailedTenants)"
+    Write-Output "Total sites attempted: $($tenantStats.TotalSitesAttempted)"
+    Write-Output "Total sites successful: $($tenantStats.TotalSitesSuccessful)"
+    Write-Output ""
+    
+    # Output per-tenant results
+    Write-Output "--- Tenant Results ---"
+    foreach ($tn in $tenantStats.TenantDetails.Keys) {
+        $t = $tenantStats.TenantDetails[$tn]
+        $statusIcon = switch ($t.Status) {
+            "Success" { "✓" }
+            "Failed" { "✗" }
+            "NoData" { "⚠" }
+            default { "?" }
+        }
+        
+        Write-Output "$statusIcon $tn`: $($t.SitesSuccessful) of $($t.SitesAttempted) sites processed in $($t.Duration)s"
+        if ($t.Status -eq "Failed") {
+            Write-Output "   Error: $($t.ErrorMessage)"
+        }
     }
 }
 catch {
-    Write-Error "Error in main execution: $_"
+    Write-Error "Critical error in main execution: $_"
     throw
 }
