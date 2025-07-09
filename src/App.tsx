@@ -685,6 +685,11 @@ Successfully sent 4 total records to Log Analytics`}
                   <p>Run the function locally with the Azure Functions Core Tools:</p>
                   <CodeBlock code={`func start`} />
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
         <TabsContent value="cicd">
           <div className="grid gap-6">
             <Card>
@@ -800,7 +805,7 @@ on:
           - prod
 
 env:
-  AZURE_FUNCTIONAPP_NAME: sharepoint-storage-monitor-${{ github.event.inputs.environment || 'dev' }}
+  AZURE_FUNCTIONAPP_NAME: "sharepoint-storage-monitor-${{ github.event.inputs.environment || 'dev' }}"
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/sharepoint-storage-monitor'
 
 jobs:
