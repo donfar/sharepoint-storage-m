@@ -805,13 +805,13 @@ on:
           - prod
 
 env:
-  AZURE_FUNCTIONAPP_NAME: "sharepoint-storage-monitor-${{ github.event.inputs.environment || 'dev' }}"
+  AZURE_FUNCTIONAPP_NAME: "sharepoint-storage-monitor-$\\{{ github.event.inputs.environment || 'dev' }}"
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'src/sharepoint-storage-monitor'
 
 jobs:
   build-and-deploy:
     runs-on: windows-latest
-    environment: ${{ github.event.inputs.environment || 'dev' }}
+    environment: $\\{{ github.event.inputs.environment || 'dev' }}
     
     steps:
     - name: Checkout repository
@@ -825,7 +825,7 @@ jobs:
     - name: Azure Login
       uses: azure/login@v1
       with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        creds: $\\{{ secrets.AZURE_CREDENTIALS }}
     
     # Additional deployment steps...`}
                     />
@@ -924,10 +924,10 @@ parameters:
   - prod
 
 variables:
-  functionAppName: 'sharepoint-storage-monitor-${{ parameters.environment }}'
+  functionAppName: 'sharepoint-storage-monitor-$\\{{ parameters.environment }}'
   functionAppPath: '$(System.DefaultWorkingDirectory)/src/sharepoint-storage-monitor'
   vmImageName: 'windows-latest'
-  resourceGroupName: 'SharePointMonitor-${{ parameters.environment }}-RG'
+  resourceGroupName: 'SharePointMonitor-$\\{{ parameters.environment }}-RG'
 
 stages:
 - stage: Build
@@ -943,7 +943,7 @@ stages:
       # Additional steps...
 
 - stage: Deploy
-  displayName: Deploy to ${{ parameters.environment }}
+  displayName: Deploy to $\\{{ parameters.environment }}
   # Deployment steps...`}
                     />
                   </div>
