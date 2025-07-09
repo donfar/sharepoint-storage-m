@@ -541,9 +541,9 @@ try {
                   <div className="ml-8 space-y-2">
                     <p>Create an app registration in each Azure Active Directory tenant:</p>
                     <ul className="list-disc pl-6 space-y-1">
-                      <li>Go to Azure Active Directory {">"}  App registrations</li>
+                      <li>Go to Azure Active Directory {`>`}  App registrations</li>
                       <li>Create a new registration in each tenant</li>
-                      <li>Grant API permissions: SharePoint {">"}  Sites.Read.All</li>
+                      <li>Grant API permissions: SharePoint {`>`}  Sites.Read.All</li>
                       <li>Create a client secret for each app registration and save the values</li>
                       <li>Note the client IDs and tenant IDs for the configuration file</li>
                     </ul>
@@ -1013,7 +1013,7 @@ stages:
                       Create and configure environments in Azure DevOps:
                     </p>
                     <ol className="list-decimal pl-6 space-y-2">
-                      <li>Go to Pipelines > Environments</li>
+                      <li>Go to Pipelines {`>`} Environments</li>
                       <li>Create environments named <code>dev</code>, <code>test</code>, and <code>prod</code></li>
                       <li>For <code>test</code> and <code>prod</code>, add approval requirements:</li>
                     </ol>
